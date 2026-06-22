@@ -209,7 +209,7 @@ with t1:
     with c2:
         user_text = st.text_input("Mensaje", placeholder="Escribí tu respuesta...", key="wa_text", label_visibility="collapsed")
     with c3:
-        send = st.button("📤", key="wa_send", width="stretch")
+        send = st.button("📤", key="wa_send", use_container_width=True)
     st.markdown('</div>', unsafe_allow_html=True)
     st.markdown('</div>', unsafe_allow_html=True)
 
