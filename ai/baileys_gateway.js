@@ -23,11 +23,41 @@ const ALLOWED_NUMBERS = process.env.ALLOWED_NUMBERS
 
 
 const botSentIds = new Set();
-let ownLid = null; // LID del propio número (para "mensaje a vos mismo")
+let ownLid = null;
+
+// ── Anti-spam con warnings ────────────────────────────────────────────────────
+const userActivity = new Map(); // jid → { msgs: [], warnings: 0, blocked: false }
+const WARN_THRESHOLD  = 15; // msgs en 60s → warning
+const BLOCK_THRESHOLD = 25; // msgs en 60s después de warning → block temporal (10 min)
+const BLOCK_DURATION  = 10 * 60 * 1000; // 10 minutos
+
+function checkSpam(jid) {
+    const now = Date.now();
+    if (!userActivity.has(jid)) userActivity.set(jid, { msgs: [], warnings: 0, blocked: false, blockedUntil: 0 });
+    const u = userActivity.get(jid);
+
+    // Verificar si sigue bloqueado
+    if (u.blocked && now < u.blockedUntil) return 'blocked';
+    if (u.blocked && now >= u.blockedUntil) { u.blocked = false; u.warnings = 0; }
+
+    // Limpiar mensajes fuera de ventana 60s
+    u.msgs = u.msgs.filter(t => now - t < 60000);
+    u.msgs.push(now);
+
+    if (u.msgs.length >= BLOCK_THRESHOLD && u.warnings > 0) {
+        u.blocked = true; u.blockedUntil = now + BLOCK_DURATION;
+        return 'block';
+    }
+    if (u.msgs.length >= WARN_THRESHOLD && u.warnings === 0) {
+        u.warnings++;
+        return 'warn';
+    }
+    return 'ok';
+}
 
 function isAllowed(jid) {
-    if (jid.endsWith('@g.us')) return false;  // grupos → bloqueado
-    if (jid.endsWith('@lid')) return jid === ownLid; // LID: solo el propio
+    if (jid.endsWith('@g.us')) return false;
+    if (jid.endsWith('@lid')) return jid === ownLid;
     if (!ALLOWED_NUMBERS) return true;
     const number = jid.split('@')[0].split(':')[0].trim();
     return ALLOWED_NUMBERS.has(number);
@@ -57,9 +87,29 @@ async function startBot() {
 
             const from = msg.key.remoteJid;
 
-            // Whitelist: ignorar silenciosamente chats no permitidos
+            // Grupos → siempre ignorar
             if (!isAllowed(from)) {
-                console.log(`⏭️  Ignorado (no en whitelist): ${from}`);
+                console.log(`⏭️  Ignorado (grupo/no permitido): ${from}`);
+                continue;
+            }
+
+            // Anti-spam
+            const spamStatus = checkSpam(from);
+            if (spamStatus === 'blocked') {
+                console.log(`🚫 Bloqueado temporalmente: ${from}`);
+                continue;
+            }
+            if (spamStatus === 'warn') {
+                await sock.sendMessage(from, {
+                    text: '⚠️ Estás enviando muchos mensajes. Por favor esperá un momento o te bloquearemos temporalmente.'
+                });
+                console.log(`⚠️ Warning enviado a: ${from}`);
+            }
+            if (spamStatus === 'block') {
+                await sock.sendMessage(from, {
+                    text: '🚫 Fuiste bloqueado temporalmente por 10 minutos por exceso de mensajes.'
+                });
+                console.log(`🚫 Bloqueado: ${from}`);
                 continue;
             }
 
