@@ -2,13 +2,27 @@
 
 import os, json, sys, base64, time
 from pathlib import Path
-from dotenv import load_dotenv
 import streamlit as st
 import folium
 from streamlit_folium import st_folium
 import pandas as pd
 
-load_dotenv(os.path.join(os.path.dirname(__file__), '..', '.env'))
+# Cargar secrets: primero .env local, luego st.secrets (Streamlit Cloud)
+try:
+    from dotenv import load_dotenv
+    load_dotenv(os.path.join(os.path.dirname(__file__), '..', '.env'))
+except ImportError:
+    pass
+
+for key in ("GEMINI_API_KEY", "DEEPSEEK_API_KEY", "ANTHROPIC_API_KEY"):
+    if not os.getenv(key):
+        try:
+            val = st.secrets.get(key)
+            if val:
+                os.environ[key] = val
+        except Exception:
+            pass
+
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 from ai.health_agents import extract_medicines_from_image, buscar_precio_farmacia, fuzzy_med_id
 from backend.app.health_models import RiskModel, FindriscInput
