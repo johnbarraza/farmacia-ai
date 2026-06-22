@@ -28,6 +28,55 @@ import os
 import json
 import base64
 from typing import Optional
+from pathlib import Path
+from functools import lru_cache
+
+# ─── DIGEMID CATALOG ─────────────────────────────────────────────────────────
+
+@lru_cache(maxsize=1)
+def _load_digemid() -> list:
+    """Carga el índice DIGEMID (18k productos). Se cachea en memoria."""
+    idx_path = Path(__file__).resolve().parents[1] / "data" / "digemid_index.json"
+    if idx_path.exists():
+        return json.loads(idx_path.read_text(encoding="utf-8"))
+    return []
+
+
+def validate_and_normalize(nombre: str) -> tuple[str, bool]:
+    """
+    Valida si un nombre extraído por OCR es un medicamento DIGEMID real.
+    Retorna (nombre_normalizado, es_medicamento).
+    Usa fuzzy matching sobre 18k productos reales.
+    """
+    from difflib import get_close_matches
+    catalogo = _load_digemid()
+    if not catalogo:
+        return nombre, True  # sin catálogo, asumir válido
+
+    nombre_up = nombre.upper().strip()
+    nombres_cat = [p["nombre"] for p in catalogo]
+    ifas_cat    = {p["ifa"]: p["nombre"] for p in catalogo if p["ifa"]}
+
+    # Exact match en nombre
+    if nombre_up in nombres_cat:
+        return nombre_up, True
+
+    # Match en IFA (principio activo)
+    for ifa, prod_nombre in ifas_cat.items():
+        if nombre_up in ifa or ifa.startswith(nombre_up[:6]):
+            return prod_nombre, True
+
+    # Fuzzy sobre nombres completos (cutoff 0.60)
+    matches = get_close_matches(nombre_up, nombres_cat, n=1, cutoff=0.60)
+    if matches:
+        return matches[0], True
+
+    # Fuzzy sobre IFAs (principios activos)
+    matches = get_close_matches(nombre_up, list(ifas_cat.keys()), n=1, cutoff=0.55)
+    if matches:
+        return ifas_cat[matches[0]], True
+
+    return nombre, False  # no encontrado en DIGEMID → probablemente no es medicamento
 
 
 # ─── OCR PRINCIPAL ────────────────────────────────────────────────────────────
@@ -51,7 +100,7 @@ def extract_medicines_from_image(
         if os.getenv("GEMINI_API_KEY"):
             result = _gemini_extract(image_bytes, image_type, None)
             if result and not result.get("_error"):
-                return result
+                return _validate_meds_digemid(result)
         return _mock_extraction(note="GEMINI_API_KEY no configurada.")
 
     if engine == "paddleocr+deepseek":
@@ -60,7 +109,7 @@ def extract_medicines_from_image(
             result = _deepseek_extract_from_text(raw_text)
             if result and not result.get("_error"):
                 result["_raw_ocr"] = raw_text
-                return result
+                return _validate_meds_digemid(result)
         return _mock_extraction(
             note="PaddleOCR o DEEPSEEK_API_KEY no disponibles." if not raw_text
             else "PaddleOCR OK pero falta DEEPSEEK_API_KEY."
@@ -72,22 +121,48 @@ def extract_medicines_from_image(
     if os.getenv("ANTHROPIC_API_KEY"):
         result = _claude_extract_from_text(raw_text) if raw_text else _claude_extract_from_image(image_bytes, image_type)
         if result and not result.get("_error"):
-            return result
+            return _validate_meds_digemid(result)
 
     if os.getenv("GEMINI_API_KEY"):
         result = _gemini_extract(image_bytes, image_type, raw_text)
         if result and not result.get("_error"):
-            return result
+            return _validate_meds_digemid(result)
 
     if raw_text and os.getenv("DEEPSEEK_API_KEY"):
         result = _deepseek_extract_from_text(raw_text)
         if result and not result.get("_error"):
-            return result
+            return _validate_meds_digemid(result)
 
     return _mock_extraction(
         note="No hay API key disponible." if not raw_text
         else "OCR extrajo texto pero falta API key para extracción estructurada."
     )
+
+
+def _validate_meds_digemid(result: dict) -> dict:
+    """
+    Post-procesa el resultado OCR:
+    - Valida cada medicamento contra catálogo DIGEMID (18k productos)
+    - Normaliza nombres ("Hiosina" → "BUTILBROMURO DE HIOSCINA")
+    - Marca y filtra insumos no-medicamentos (Jeringa, Suero Vitaminado, etc.)
+    """
+    meds = result.get("medicamentos", [])
+    validados = []
+    filtrados = []
+    for m in meds:
+        nombre_original = m.get("nombre", "")
+        nombre_norm, es_med = validate_and_normalize(nombre_original)
+        if es_med:
+            m["nombre"] = nombre_norm.title()  # "METFORMINA" → "Metformina"
+            m["_validado_digemid"] = True
+            validados.append(m)
+        else:
+            filtrados.append(nombre_original)
+
+    result["medicamentos"] = validados
+    if filtrados:
+        result["_filtrados_digemid"] = filtrados
+    return result
 
 
 # ─── PADDLE OCR ───────────────────────────────────────────────────────────────

@@ -205,13 +205,18 @@ with t1:
 
                     if ahorro > 0.01:
                         resp += f"---\n💵 **Ahorrás ~S/{ahorro:.2f}** eligiendo la farmacia correcta\n\n"
+
+                    filtrados = result.get("_filtrados_digemid", [])
+                    if filtrados:
+                        resp += f"⚠️ Filtrados (no son medicamentos DIGEMID): {', '.join(filtrados)}\n\n"
+
                     resp += "¿Querés activar **RECORDATORIOS** para estas pastillas?\nEscribí **SI** para activar."
                 else:
                     resp = "❌ No pude leer los medicamentos. Intentá con mejor luz o cambiá el motor OCR."
 
                 resp += f"\n\n`⏱ {elapsed:.1f}s · {motor_label}`"
                 if es_mock:
-                    resp += "\n> ⚠️ Datos de demo. Para OCR real instalá PaddleOCR o usá Gemini Vision."
+                    resp += "\n> ⚠️ Datos de demo. Para OCR real usá Gemini Vision."
 
                 if raw_ocr:
                     with st.expander("📄 Texto extraído por PaddleOCR"):
