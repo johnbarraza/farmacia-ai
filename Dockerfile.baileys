@@ -1,0 +1,15 @@
+FROM node:20-slim
+
+WORKDIR /app
+
+COPY ai/package.json ai/package-lock.json* ./
+RUN npm ci --omit=dev
+
+COPY ai/baileys_gateway.js ./
+
+# Auth state persisted via volume at /app/whatsapp_auth
+VOLUME ["/app/whatsapp_auth"]
+
+ENV FASTAPI_URL=http://backend:8000
+
+CMD ["node", "baileys_gateway.js"]

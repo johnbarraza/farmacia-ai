@@ -1,0 +1,52 @@
+version: "3.9"
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    container_name: saludapp-backend
+    ports:
+      - "8000:8000"
+    env_file: .env
+    volumes:
+      - ./data:/app/data
+    restart: unless-stopped
+
+  baileys:
+    build:
+      context: .
+      dockerfile: Dockerfile.baileys
+    container_name: saludapp-baileys
+    depends_on:
+      - backend
+    env_file: .env
+    environment:
+      - FASTAPI_URL=http://backend:8000
+    volumes:
+      - whatsapp_auth:/app/whatsapp_auth
+    restart: unless-stopped
+    # Ver QR: docker logs -f saludapp-baileys
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    container_name: saludapp-frontend
+    ports:
+      - "8501:8501"
+    depends_on:
+      - backend
+    env_file: .env
+    environment:
+      - BACKEND_URL=http://backend:8000
+      - PYTHONIOENCODING=utf-8
+      - PYTHONUNBUFFERED=1
+    volumes:
+      - ./data:/app/data
+      - streamlit_cache:/root/.streamlit
+    restart: unless-stopped
+
+volumes:
+  whatsapp_auth:
+  streamlit_cache:

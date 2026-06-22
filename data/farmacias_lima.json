@@ -1,0 +1,197 @@
+[
+  {
+    "id": "F001", "nombre": "Inkafarma San Isidro", "cadena": "Inkafarma",
+    "direccion": "Av. Javier Prado Este 1045, San Isidro",
+    "lat": -12.0931, "lng": -77.0353,
+    "distrito": "San Isidro", "telefono": "01-6110000",
+    "horario": "8am-10pm",
+    "precios": {
+      "metformina_500mg": 0.45, "atorvastatina_20mg": 0.90, "losartan_50mg": 0.65,
+      "amlodipino_5mg": 0.55, "omeprazol_20mg": 0.30, "ibuprofeno_400mg": 0.20,
+      "paracetamol_500mg": 0.15, "amoxicilina_500mg": 0.80, "enalapril_10mg": 0.40,
+      "aspirina_100mg": 0.18
+    }
+  },
+  {
+    "id": "F002", "nombre": "Mifarma Miraflores", "cadena": "Mifarma",
+    "direccion": "Av. Larco 1150, Miraflores",
+    "lat": -12.1218, "lng": -77.0289,
+    "distrito": "Miraflores", "telefono": "01-6080000",
+    "horario": "7am-11pm",
+    "precios": {
+      "metformina_500mg": 0.42, "atorvastatina_20mg": 0.88, "losartan_50mg": 0.60,
+      "amlodipino_5mg": 0.50, "omeprazol_20mg": 0.28, "ibuprofeno_400mg": 0.18,
+      "paracetamol_500mg": 0.12, "amoxicilina_500mg": 0.75, "enalapril_10mg": 0.38,
+      "aspirina_100mg": 0.15
+    }
+  },
+  {
+    "id": "F003", "nombre": "Boticas y Salud San Borja", "cadena": "Boticas y Salud",
+    "direccion": "Av. San Luis 2050, San Borja",
+    "lat": -12.1050, "lng": -77.0020,
+    "distrito": "San Borja", "telefono": "01-2250000",
+    "horario": "8am-10pm",
+    "precios": {
+      "metformina_500mg": 0.40, "atorvastatina_20mg": 0.85, "losartan_50mg": 0.58,
+      "amlodipino_5mg": 0.48, "omeprazol_20mg": 0.25, "ibuprofeno_400mg": 0.17,
+      "paracetamol_500mg": 0.10, "amoxicilina_500mg": 0.72, "enalapril_10mg": 0.35,
+      "aspirina_100mg": 0.14
+    }
+  },
+  {
+    "id": "F004", "nombre": "Inkafarma Surco", "cadena": "Inkafarma",
+    "direccion": "Av. Benavides 5045, Surco",
+    "lat": -12.1470, "lng": -76.9920,
+    "distrito": "Surco", "telefono": "01-6110001",
+    "horario": "8am-10pm",
+    "precios": {
+      "metformina_500mg": 0.45, "atorvastatina_20mg": 0.92, "losartan_50mg": 0.67,
+      "amlodipino_5mg": 0.57, "omeprazol_20mg": 0.32, "ibuprofeno_400mg": 0.22,
+      "paracetamol_500mg": 0.16, "amoxicilina_500mg": 0.82, "enalapril_10mg": 0.42,
+      "aspirina_100mg": 0.20
+    }
+  },
+  {
+    "id": "F005", "nombre": "Botica Arcangel Jesus Maria", "cadena": "Boticas Arcangel",
+    "direccion": "Av. Brasil 1520, Jesus Maria",
+    "lat": -12.0780, "lng": -77.0490,
+    "distrito": "Jesus Maria", "telefono": "01-4230000",
+    "horario": "7am-11pm",
+    "precios": {
+      "metformina_500mg": 0.38, "atorvastatina_20mg": 0.82, "losartan_50mg": 0.55,
+      "amlodipino_5mg": 0.46, "omeprazol_20mg": 0.23, "ibuprofeno_400mg": 0.16,
+      "paracetamol_500mg": 0.09, "amoxicilina_500mg": 0.70, "enalapril_10mg": 0.33,
+      "aspirina_100mg": 0.13
+    }
+  },
+  {
+    "id": "F006", "nombre": "Mifarma La Victoria", "cadena": "Mifarma",
+    "direccion": "Av. Aviacion 2355, La Victoria",
+    "lat": -12.0820, "lng": -77.0150,
+    "distrito": "La Victoria", "telefono": "01-6080001",
+    "horario": "6am-12am",
+    "precios": {
+      "metformina_500mg": 0.38, "atorvastatina_20mg": 0.80, "losartan_50mg": 0.52,
+      "amlodipino_5mg": 0.44, "omeprazol_20mg": 0.22, "ibuprofeno_400mg": 0.15,
+      "paracetamol_500mg": 0.08, "amoxicilina_500mg": 0.68, "enalapril_10mg": 0.30,
+      "aspirina_100mg": 0.12
+    }
+  },
+  {
+    "id": "F007", "nombre": "Inkafarma Barranco", "cadena": "Inkafarma",
+    "direccion": "Av. Republica de Panama 6810, Barranco",
+    "lat": -12.1480, "lng": -77.0210,
+    "distrito": "Barranco", "telefono": "01-6110002",
+    "horario": "8am-10pm",
+    "precios": {
+      "metformina_500mg": 0.45, "atorvastatina_20mg": 0.90, "losartan_50mg": 0.65,
+      "amlodipino_5mg": 0.55, "omeprazol_20mg": 0.30, "ibuprofeno_400mg": 0.20,
+      "paracetamol_500mg": 0.14, "amoxicilina_500mg": 0.80, "enalapril_10mg": 0.40,
+      "aspirina_100mg": 0.18
+    }
+  },
+  {
+    "id": "F008", "nombre": "Farmacia Universal Lima Centro", "cadena": "Farmacia Universal",
+    "direccion": "Jr. Cuzco 386, Lima Centro",
+    "lat": -12.0550, "lng": -77.0340,
+    "distrito": "Lima", "telefono": "01-4270000",
+    "horario": "8am-9pm",
+    "precios": {
+      "metformina_500mg": 0.35, "atorvastatina_20mg": 0.78, "losartan_50mg": 0.50,
+      "amlodipino_5mg": 0.42, "omeprazol_20mg": 0.20, "ibuprofeno_400mg": 0.14,
+      "paracetamol_500mg": 0.08, "amoxicilina_500mg": 0.65, "enalapril_10mg": 0.28,
+      "aspirina_100mg": 0.10
+    }
+  },
+  {
+    "id": "F009", "nombre": "Mifarma San Miguel", "cadena": "Mifarma",
+    "direccion": "Av. La Marina 2390, San Miguel",
+    "lat": -12.0770, "lng": -77.0880,
+    "distrito": "San Miguel", "telefono": "01-6080002",
+    "horario": "7am-11pm",
+    "precios": {
+      "metformina_500mg": 0.42, "atorvastatina_20mg": 0.86, "losartan_50mg": 0.60,
+      "amlodipino_5mg": 0.50, "omeprazol_20mg": 0.27, "ibuprofeno_400mg": 0.18,
+      "paracetamol_500mg": 0.11, "amoxicilina_500mg": 0.74, "enalapril_10mg": 0.37,
+      "aspirina_100mg": 0.15
+    }
+  },
+  {
+    "id": "F010", "nombre": "Botica San Pablo Lince", "cadena": "Botica San Pablo",
+    "direccion": "Av. Arequipa 2890, Lince",
+    "lat": -12.0880, "lng": -77.0370,
+    "distrito": "Lince", "telefono": "01-2110000",
+    "horario": "8am-10pm",
+    "precios": {
+      "metformina_500mg": 0.40, "atorvastatina_20mg": 0.84, "losartan_50mg": 0.57,
+      "amlodipino_5mg": 0.47, "omeprazol_20mg": 0.24, "ibuprofeno_400mg": 0.16,
+      "paracetamol_500mg": 0.09, "amoxicilina_500mg": 0.71, "enalapril_10mg": 0.34,
+      "aspirina_100mg": 0.13
+    }
+  },
+  {
+    "id": "F011", "nombre": "Inkafarma San Juan de Lurigancho", "cadena": "Inkafarma",
+    "direccion": "Av. Gran Chimu 500, SJL",
+    "lat": -12.0120, "lng": -76.9980,
+    "distrito": "San Juan de Lurigancho", "telefono": "01-6110003",
+    "horario": "8am-10pm",
+    "precios": {
+      "metformina_500mg": 0.45, "atorvastatina_20mg": 0.90, "losartan_50mg": 0.64,
+      "amlodipino_5mg": 0.54, "omeprazol_20mg": 0.30, "ibuprofeno_400mg": 0.19,
+      "paracetamol_500mg": 0.13, "amoxicilina_500mg": 0.79, "enalapril_10mg": 0.40,
+      "aspirina_100mg": 0.17
+    }
+  },
+  {
+    "id": "F012", "nombre": "Mifarma Villa El Salvador", "cadena": "Mifarma",
+    "direccion": "Av. Cesar Vallejo 1020, VES",
+    "lat": -12.2150, "lng": -76.9390,
+    "distrito": "Villa El Salvador", "telefono": "01-6080003",
+    "horario": "7am-10pm",
+    "precios": {
+      "metformina_500mg": 0.40, "atorvastatina_20mg": 0.83, "losartan_50mg": 0.56,
+      "amlodipino_5mg": 0.46, "omeprazol_20mg": 0.24, "ibuprofeno_400mg": 0.16,
+      "paracetamol_500mg": 0.09, "amoxicilina_500mg": 0.70, "enalapril_10mg": 0.33,
+      "aspirina_100mg": 0.13
+    }
+  },
+  {
+    "id": "F013", "nombre": "Botica Perufarma Callao", "cadena": "Perufarma",
+    "direccion": "Jr. Ica 355, Callao",
+    "lat": -12.0580, "lng": -77.1200,
+    "distrito": "Callao", "telefono": "01-4290000",
+    "horario": "7am-11pm",
+    "precios": {
+      "metformina_500mg": 0.36, "atorvastatina_20mg": 0.79, "losartan_50mg": 0.51,
+      "amlodipino_5mg": 0.43, "omeprazol_20mg": 0.21, "ibuprofeno_400mg": 0.14,
+      "paracetamol_500mg": 0.08, "amoxicilina_500mg": 0.66, "enalapril_10mg": 0.29,
+      "aspirina_100mg": 0.11
+    }
+  },
+  {
+    "id": "F014", "nombre": "Inkafarma Ate Vitarte", "cadena": "Inkafarma",
+    "direccion": "Carretera Central 3500, Ate",
+    "lat": -12.0650, "lng": -76.9200,
+    "distrito": "Ate Vitarte", "telefono": "01-6110004",
+    "horario": "8am-10pm",
+    "precios": {
+      "metformina_500mg": 0.44, "atorvastatina_20mg": 0.89, "losartan_50mg": 0.63,
+      "amlodipino_5mg": 0.53, "omeprazol_20mg": 0.29, "ibuprofeno_400mg": 0.19,
+      "paracetamol_500mg": 0.13, "amoxicilina_500mg": 0.78, "enalapril_10mg": 0.39,
+      "aspirina_100mg": 0.16
+    }
+  },
+  {
+    "id": "F015", "nombre": "Mifarma Pueblo Libre", "cadena": "Mifarma",
+    "direccion": "Av. Sucre 1260, Pueblo Libre",
+    "lat": -12.0740, "lng": -77.0640,
+    "distrito": "Pueblo Libre", "telefono": "01-6080004",
+    "horario": "7am-11pm",
+    "precios": {
+      "metformina_500mg": 0.41, "atorvastatina_20mg": 0.85, "losartan_50mg": 0.59,
+      "amlodipino_5mg": 0.49, "omeprazol_20mg": 0.26, "ibuprofeno_400mg": 0.17,
+      "paracetamol_500mg": 0.10, "amoxicilina_500mg": 0.73, "enalapril_10mg": 0.36,
+      "aspirina_100mg": 0.14
+    }
+  }
+]
