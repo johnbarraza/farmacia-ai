@@ -1,8 +1,11 @@
 __pycache__
 *.pyc
 .git
-.env.example
+.env
 .streamlit
 *.md
 docs/
 notebooks/
+demo/
+data/sessions/
+whatsapp_auth/
