@@ -379,24 +379,71 @@ def _mock_extraction(note: str = "") -> dict:
 
 # ─── AGENTES DE BÚSQUEDA (patrón crewAI — Lectura 10-11) ─────────────────────
 
-def buscar_precio_farmacia(medicamento_id: str, farmacias_data: list) -> list:
-    """Busca precio de un medicamento en todas las farmacias. Ordena por precio."""
+def buscar_precio_farmacia(
+    medicamento_id: str,
+    farmacias_data: list,
+    lat_usuario: float = -12.0931,
+    lng_usuario: float = -77.0353,
+    max_km: float = 5.0,
+) -> list:
+    """
+    Busca precio de un medicamento en farmacias dentro de max_km.
+    Ordena por precio_efectivo = precio + penalidad_distancia.
+    Penalidad: S/0.50 por km adicional (costo de movilidad).
+    """
+    COSTO_SOL_POR_KM = 0.50  # S/0.50/km — costo de movilidad aprox Lima
     resultados = []
     for f in farmacias_data:
         precio = f.get("precios", {}).get(medicamento_id)
-        if precio is not None:
-            resultados.append({
-                "farmacia_id": f["id"],
-                "nombre": f["nombre"],
-                "cadena": f["cadena"],
-                "direccion": f["direccion"],
-                "distrito": f["distrito"],
-                "lat": f["lat"],
-                "lng": f["lng"],
-                "precio": precio,
-                "horario": f.get("horario", ""),
-            })
-    return sorted(resultados, key=lambda x: x["precio"])
+        if precio is None:
+            continue
+        dist_km = round(((f["lat"] - lat_usuario)**2 + (f["lng"] - lng_usuario)**2)**0.5 * 111, 2)
+        if dist_km > max_km:
+            continue
+        precio_efectivo = precio + dist_km * COSTO_SOL_POR_KM
+        resultados.append({
+            "farmacia_id": f["id"],
+            "nombre": f["nombre"],
+            "cadena": f["cadena"],
+            "direccion": f["direccion"],
+            "distrito": f["distrito"],
+            "lat": f["lat"],
+            "lng": f["lng"],
+            "precio": precio,
+            "dist_km": dist_km,
+            "precio_efectivo": round(precio_efectivo, 2),
+            "horario": f.get("horario", ""),
+        })
+    return sorted(resultados, key=lambda x: x["precio_efectivo"])
+
+
+def fuzzy_med_id(nombre: str, meds_db: list) -> str:
+    """
+    Busca el med_id más cercano al nombre extraído por OCR.
+    Usa difflib para tolerar errores de OCR como Hiosina → hioscina.
+    """
+    from difflib import get_close_matches
+    nombre_lower = nombre.lower().strip()
+
+    # Prefijo exacto (6 chars)
+    for m in meds_db:
+        if nombre_lower[:6] in m["nombre"].lower():
+            return m["id"]
+
+    # Fuzzy sobre nombres completos (cutoff 0.55 — permisivo para OCR)
+    db_nombres = {m["nombre"].lower(): m["id"] for m in meds_db}
+    matches = get_close_matches(nombre_lower, db_nombres.keys(), n=1, cutoff=0.55)
+    if matches:
+        return db_nombres[matches[0]]
+
+    # Fuzzy sobre IDs (metformina_500mg etc)
+    db_ids = [m["id"] for m in meds_db]
+    id_query = nombre_lower.replace(" ", "_")
+    matches = get_close_matches(id_query, db_ids, n=1, cutoff=0.50)
+    if matches:
+        return matches[0]
+
+    return nombre_lower.replace(" ", "_")
 
 
 def generar_calendario_recordatorios(medicamentos: list, fecha_inicio: str) -> list:

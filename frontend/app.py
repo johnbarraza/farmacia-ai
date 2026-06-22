@@ -10,7 +10,7 @@ import pandas as pd
 
 load_dotenv(os.path.join(os.path.dirname(__file__), '..', '.env'))
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-from ai.health_agents import extract_medicines_from_image, buscar_precio_farmacia
+from ai.health_agents import extract_medicines_from_image, buscar_precio_farmacia, fuzzy_med_id
 from backend.app.health_models import RiskModel, FindriscInput
 
 st.set_page_config(page_title="FarmaciaAI", page_icon="💊", layout="wide",
@@ -164,10 +164,11 @@ with t1:
                 elapsed = time.time() - t0
                 meds = result.get("medicamentos", [])
                 raw_ocr = result.get("_raw_ocr", "")
-                motor_usado = result.get("motor", engine)
+                fuente = result.get("fuente_ocr", engine)  # campo real del resultado
+                es_mock = fuente == "demo_mock"
+                motor_label = "⚠️ DEMO (PaddleOCR no instalado)" if es_mock else fuente
 
                 if meds:
-                    # Guardar en session_state para usar en Tab Precios
                     st.session_state.ocr_meds = meds
                     resp = f"✅ **{len(meds)} medicamento(s) encontrado(s):**\n\n"
                     ahorro = 0
@@ -176,24 +177,27 @@ with t1:
                         dosis = f" {m['dosis']}" if m.get("dosis") else ""
                         frec  = f" · {m['frecuencia']}" if m.get("frecuencia") else ""
                         resp += f"**{i}. {nombre}{dosis}**{frec}\n"
-                        med_id = nombre.lower().replace(" ", "_")
-                        for db_m in meds_db:
-                            if nombre.lower()[:6] in db_m["nombre"].lower():
-                                med_id = db_m["id"]; break
+
+                        med_id = fuzzy_med_id(nombre, meds_db)
                         precios = buscar_precio_farmacia(med_id, farmacias)
                         if precios:
                             b = precios[0]; c_p = precios[-1]
                             ahorro += c_p["precio"] - b["precio"]
-                            resp += f"   💚 S/{b['precio']:.2f} en {b['nombre'][:28]}\n"
-                            resp += f"   🔴 S/{c_p['precio']:.2f} en {c_p['nombre'][:28]}\n"
+                            resp += f"   💚 S/{b['precio']:.2f} en {b['nombre'][:28]} (~{b['dist_km']} km)\n"
+                            resp += f"   🔴 S/{c_p['precio']:.2f} en {c_p['nombre'][:28]} (~{c_p['dist_km']} km)\n"
+                        else:
+                            resp += f"   ℹ️ No encontrado en DB — buscá en [Inkafarma](https://inkafarma.pe/buscador?keyword={nombre.replace(' ', '+')})\n"
                         resp += "\n"
+
                     if ahorro > 0.01:
                         resp += f"---\n💵 **Ahorrás ~S/{ahorro:.2f}** eligiendo la farmacia correcta\n\n"
                     resp += "¿Querés activar **RECORDATORIOS** para estas pastillas?\nEscribí **SI** para activar."
                 else:
                     resp = "❌ No pude leer los medicamentos. Intentá con mejor luz o cambiá el motor OCR."
 
-                resp += f"\n\n`⏱ {elapsed:.1f}s · motor: {motor_usado}`"
+                resp += f"\n\n`⏱ {elapsed:.1f}s · {motor_label}`"
+                if es_mock:
+                    resp += "\n> ⚠️ Datos de demo. Para OCR real instalá PaddleOCR o usá Gemini Vision."
 
                 if raw_ocr:
                     with st.expander("📄 Texto extraído por PaddleOCR"):
