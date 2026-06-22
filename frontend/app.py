@@ -167,6 +167,8 @@ with t1:
                 motor_usado = result.get("motor", engine)
 
                 if meds:
+                    # Guardar en session_state para usar en Tab Precios
+                    st.session_state.ocr_meds = meds
                     resp = f"✅ **{len(meds)} medicamento(s) encontrado(s):**\n\n"
                     ahorro = 0
                     for i, m in enumerate(meds[:5], 1):
@@ -187,7 +189,7 @@ with t1:
                         resp += "\n"
                     if ahorro > 0.01:
                         resp += f"---\n💵 **Ahorrás ~S/{ahorro:.2f}** eligiendo la farmacia correcta\n\n"
-                    resp += "¿Querés activar **RECORDATORIOS** para estas pastillas?"
+                    resp += "¿Querés activar **RECORDATORIOS** para estas pastillas?\nEscribí **SI** para activar."
                 else:
                     resp = "❌ No pude leer los medicamentos. Intentá con mejor luz o cambiá el motor OCR."
 
@@ -235,7 +237,21 @@ with t1:
                         "Tu familiar recibe una alerta si olvidás tomar tus pastillas.\n\n"
                         "7 días gratis → S/14.90/mes\n"
                         "¿Cuál es el número de WhatsApp de tu familiar?")
-            elif txt in ("GRACIAS", "THANK", "OK", "GENIAL"):
+            elif txt in ("SI", "SÍ", "YES", "DALE", "OK RECORDATORIOS"):
+                meds_rec = st.session_state.get("ocr_meds", [])
+                if meds_rec:
+                    nombres = [m.get("nombre", "?") for m in meds_rec[:5]]
+                    lista = "\n".join(f"☀️ 8:00 AM — {n}" for n in nombres)
+                    resp = (f"✅ **Recordatorios activados para {len(nombres)} medicamento(s):**\n\n"
+                            f"{lista}\n\n"
+                            f"En producción: te llego por WhatsApp todos los días. 🔔\n\n"
+                            f"¿Querés también el **REPORTE** PDF para tu médico?")
+                else:
+                    resp = ("✅ **Recordatorios activados** (demo)\n\n"
+                            "☀️ 8:00 AM — Pastilla con desayuno\n"
+                            "🌙 9:00 PM — Pastilla con cena\n\n"
+                            "En producción: te llega por WhatsApp todos los días. 🔔")
+            elif txt in ("GRACIAS", "THANK", "GENIAL"):
                 resp = "😊 ¡De nada! Si necesitás algo más, aquí estoy."
             elif txt in ("REPORTE", "PDF", "INFORME", "4"):
                 resp = "📄 Abrí la pestaña **📊 Riesgo** → completá el test → descargá el PDF para tu médico."
@@ -257,6 +273,29 @@ with t1:
 with t2:
     st.markdown("### 💊 Comparador de Precios de Medicamentos")
     st.caption("Compará precios de genéricos en 15 farmacias de Lima. Fuente: DIGEMID.")
+
+    # Medicamentos detectados por OCR
+    ocr_meds = st.session_state.get("ocr_meds", [])
+    if ocr_meds:
+        st.markdown("**📸 Medicamentos de tu última receta:**")
+        cols = st.columns(len(ocr_meds[:5]))
+        for i, (col, m) in enumerate(zip(cols, ocr_meds[:5])):
+            nombre = m.get("nombre", "?")
+            dosis  = m.get("dosis", "")
+            with col:
+                med_id = nombre.lower().replace(" ", "_")
+                for db_m in meds_db:
+                    if nombre.lower()[:6] in db_m["nombre"].lower():
+                        med_id = db_m["id"]; break
+                precios = buscar_precio_farmacia(med_id, farmacias)
+                precio_str = f"S/{precios[0]['precio']:.2f}" if precios else "No en DB"
+                st.markdown(f"""<div class="card" style="text-align:center;padding:12px;">
+                    <b style="color:#00D4FF;">{nombre}</b><br>
+                    <small style="color:#8696A0;">{dosis}</small><br><br>
+                    <b style="color:#00FF88;font-size:1.1em;">{precio_str}</b><br>
+                    <small style="color:#8696A0;">más barato</small>
+                </div>""", unsafe_allow_html=True)
+        st.markdown("---")
 
     col1, col2 = st.columns([1, 2])
     with col1:
@@ -325,6 +364,27 @@ with t2:
 with t3:
     st.markdown("### 📊 Test de Riesgo de Diabetes Tipo 2")
     st.caption("Cuestionario FINDRISC validado por la OMS. Sin análisis de sangre.")
+
+    with st.expander("ℹ️ ¿Qué es FINDRISC y en qué se basa?"):
+        st.markdown("""
+**FINDRISC** (Finnish Diabetes Risk Score) es un cuestionario de 8 preguntas desarrollado por la
+**Asociación Finlandesa de Diabetes** y validado por la OMS para detectar riesgo de diabetes tipo 2
+sin necesidad de análisis de sangre.
+
+| Puntaje | Riesgo | Probabilidad a 10 años |
+|---|---|---|
+| < 7 | Bajo | ~1% |
+| 7–11 | Ligeramente elevado | ~4% |
+| 12–14 | Moderado | ~17% |
+| 15–20 | Alto | ~33% |
+| > 20 | Muy alto | ~50% |
+
+**Fuente:** Lindström J, Tuomilehto J. *The diabetes risk score: a practical tool to predict type 2 diabetes risk.*
+Diabetes Care. 2003;26(3):725–731. [doi:10.2337/diacare.26.3.725](https://doi.org/10.2337/diacare.26.3.725)
+
+Adoptado por la OMS y usado en más de 40 países. Sensibilidad: 78%, especificidad: 77% para detectar
+diabetes no diagnosticada en población general.
+        """)
 
     col1, col2 = st.columns(2)
     with col1:
