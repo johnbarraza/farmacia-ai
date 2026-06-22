@@ -3,6 +3,11 @@
 import os, json, sys, base64, time
 from pathlib import Path
 import streamlit as st
+
+# set_page_config DEBE ser el primer comando Streamlit — antes de cualquier st.*
+st.set_page_config(page_title="FarmaciaAI", page_icon="💊", layout="wide",
+                   initial_sidebar_state="collapsed")
+
 import folium
 from streamlit_folium import st_folium
 import pandas as pd
@@ -26,9 +31,6 @@ for key in ("GEMINI_API_KEY", "DEEPSEEK_API_KEY", "ANTHROPIC_API_KEY"):
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 from ai.health_agents import extract_medicines_from_image, buscar_precio_farmacia, fuzzy_med_id
 from backend.app.health_models import RiskModel, FindriscInput
-
-st.set_page_config(page_title="FarmaciaAI", page_icon="💊", layout="wide",
-                   initial_sidebar_state="collapsed")
 
 DATA_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "../data"))
 
