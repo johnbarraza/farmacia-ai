@@ -32,38 +32,61 @@ from typing import Optional
 
 # ─── OCR PRINCIPAL ────────────────────────────────────────────────────────────
 
-def extract_medicines_from_image(image_bytes: bytes, image_type: str = "jpeg") -> dict:
+def extract_medicines_from_image(
+    image_bytes: bytes,
+    image_type: str = "jpeg",
+    engine: str = "auto"   # "auto" | "gemini" | "paddleocr+deepseek" | "mock"
+) -> dict:
     """
     Extrae medicamentos de imagen de boleta o receta.
-    Cadena: PaddleOCR → Claude → Gemini → DeepSeek(texto) → mock
+    engine="auto"               → PaddleOCR → Claude → Gemini → DeepSeek → mock
+    engine="gemini"             → directo a Gemini Vision
+    engine="paddleocr+deepseek" → PaddleOCR texto → DeepSeek
+    engine="mock"               → datos de demo sin API
     """
+    if engine == "mock":
+        return _mock_extraction(note="Modo demo seleccionado.")
+
+    if engine == "gemini":
+        if os.getenv("GEMINI_API_KEY"):
+            result = _gemini_extract(image_bytes, image_type, None)
+            if result and not result.get("_error"):
+                return result
+        return _mock_extraction(note="GEMINI_API_KEY no configurada.")
+
+    if engine == "paddleocr+deepseek":
+        raw_text = _try_paddleocr(image_bytes)
+        if raw_text and os.getenv("DEEPSEEK_API_KEY"):
+            result = _deepseek_extract_from_text(raw_text)
+            if result and not result.get("_error"):
+                result["_raw_ocr"] = raw_text
+                return result
+        return _mock_extraction(
+            note="PaddleOCR o DEEPSEEK_API_KEY no disponibles." if not raw_text
+            else "PaddleOCR OK pero falta DEEPSEEK_API_KEY."
+        )
+
+    # engine == "auto"
     raw_text = _try_paddleocr(image_bytes)
 
-    # Claude Vision (mejor para extracción estructurada)
     if os.getenv("ANTHROPIC_API_KEY"):
-        if raw_text:
-            result = _claude_extract_from_text(raw_text)
-        else:
-            result = _claude_extract_from_image(image_bytes, image_type)
+        result = _claude_extract_from_text(raw_text) if raw_text else _claude_extract_from_image(image_bytes, image_type)
         if result and not result.get("_error"):
             return result
 
-    # Gemini Vision (fallback — bueno para OCR multimodal)
     if os.getenv("GEMINI_API_KEY"):
         result = _gemini_extract(image_bytes, image_type, raw_text)
         if result and not result.get("_error"):
             return result
 
-    # DeepSeek (solo texto — usa el OCR de PaddleOCR como input)
     if raw_text and os.getenv("DEEPSEEK_API_KEY"):
         result = _deepseek_extract_from_text(raw_text)
         if result and not result.get("_error"):
             return result
 
     return _mock_extraction(
-        note="No hay API key disponible. Agrega ANTHROPIC_API_KEY o GEMINI_API_KEY al .env"
-        if not raw_text else
-        "OCR extrajo texto pero falta API key para extracción estructurada."
+        note="No hay API key disponible." if not raw_text
+        else "OCR extrajo texto pero falta API key para extracción estructurada."
     )
 
 

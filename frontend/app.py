@@ -1,6 +1,6 @@
 """FarmaciaAI — Streamlit Frontend"""
 
-import os, json, sys, base64
+import os, json, sys, base64, time
 from pathlib import Path
 from dotenv import load_dotenv
 import streamlit as st
@@ -131,6 +131,20 @@ with t1:
 
     with col_upload:
         st.markdown("**📸 Subir receta**")
+
+        engine = st.radio(
+            "Motor OCR",
+            ["Auto", "Gemini Vision", "PaddleOCR + DeepSeek", "Mock (demo)"],
+            index=0,
+            help="Auto usa la mejor opción disponible según tus API keys"
+        )
+        engine_map = {
+            "Auto": "auto",
+            "Gemini Vision": "gemini",
+            "PaddleOCR + DeepSeek": "paddleocr+deepseek",
+            "Mock (demo)": "mock"
+        }
+
         uploaded = st.file_uploader(
             "Foto de receta médica",
             type=["jpg", "jpeg", "png"],
@@ -141,36 +155,47 @@ with t1:
             st.image(uploaded, caption="Receta cargada", use_column_width=True)
             if st.button("🔍 Analizar receta", use_container_width=True):
                 st.session_state.messages.append({"role": "user", "content": "📸 [Foto de receta]"})
-                with st.spinner("Procesando con Gemini Vision..."):
+                t0 = time.time()
+                with st.spinner(f"Procesando con {engine}..."):
                     img_bytes = uploaded.read()
                     ext = (uploaded.name or "img.jpg").rsplit(".", 1)[-1].lower()
                     img_type = "jpeg" if ext in ("jpg", "jpeg") else ext
-                    result = extract_medicines_from_image(img_bytes, img_type)
-                    meds = result.get("medicamentos", [])
+                    result = extract_medicines_from_image(img_bytes, img_type, engine=engine_map[engine])
+                elapsed = time.time() - t0
+                meds = result.get("medicamentos", [])
+                raw_ocr = result.get("_raw_ocr", "")
+                motor_usado = result.get("motor", engine)
 
-                    if meds:
-                        resp = f"✅ **{len(meds)} medicamento(s) encontrado(s):**\n\n"
-                        ahorro = 0
-                        for i, m in enumerate(meds[:5], 1):
-                            nombre = m.get("nombre", "?")
-                            dosis = f" {m['dosis']}" if m.get("dosis") else ""
-                            resp += f"**{i}. {nombre}{dosis}**\n"
-                            med_id = nombre.lower().replace(" ", "_")
-                            for db_m in meds_db:
-                                if nombre.lower()[:6] in db_m["nombre"].lower():
-                                    med_id = db_m["id"]; break
-                            precios = buscar_precio_farmacia(med_id, farmacias)
-                            if precios:
-                                b = precios[0]; c_p = precios[-1]
-                                ahorro += c_p["precio"] - b["precio"]
-                                resp += f"   💚 S/{b['precio']:.2f} en {b['nombre'][:30]}\n"
-                                resp += f"   🔴 S/{c_p['precio']:.2f} en {c_p['nombre'][:30]}\n"
-                            resp += "\n"
-                        if ahorro > 0.01:
-                            resp += f"---\n💵 **Ahorrás ~S/{ahorro:.2f}** eligiendo la farmacia correcta\n\n"
-                        resp += "¿Querés activar **RECORDATORIOS** para estas pastillas?"
-                    else:
-                        resp = "❌ No pude leer la receta. Intentá con una foto con mejor luz y enfoque."
+                if meds:
+                    resp = f"✅ **{len(meds)} medicamento(s) encontrado(s):**\n\n"
+                    ahorro = 0
+                    for i, m in enumerate(meds[:5], 1):
+                        nombre = m.get("nombre", "?")
+                        dosis = f" {m['dosis']}" if m.get("dosis") else ""
+                        frec  = f" · {m['frecuencia']}" if m.get("frecuencia") else ""
+                        resp += f"**{i}. {nombre}{dosis}**{frec}\n"
+                        med_id = nombre.lower().replace(" ", "_")
+                        for db_m in meds_db:
+                            if nombre.lower()[:6] in db_m["nombre"].lower():
+                                med_id = db_m["id"]; break
+                        precios = buscar_precio_farmacia(med_id, farmacias)
+                        if precios:
+                            b = precios[0]; c_p = precios[-1]
+                            ahorro += c_p["precio"] - b["precio"]
+                            resp += f"   💚 S/{b['precio']:.2f} en {b['nombre'][:28]}\n"
+                            resp += f"   🔴 S/{c_p['precio']:.2f} en {c_p['nombre'][:28]}\n"
+                        resp += "\n"
+                    if ahorro > 0.01:
+                        resp += f"---\n💵 **Ahorrás ~S/{ahorro:.2f}** eligiendo la farmacia correcta\n\n"
+                    resp += "¿Querés activar **RECORDATORIOS** para estas pastillas?"
+                else:
+                    resp = "❌ No pude leer los medicamentos. Intentá con mejor luz o cambiá el motor OCR."
+
+                resp += f"\n\n`⏱ {elapsed:.1f}s · motor: {motor_usado}`"
+
+                if raw_ocr:
+                    with st.expander("📄 Texto extraído por PaddleOCR"):
+                        st.code(raw_ocr)
 
                 st.session_state.messages.append({"role": "assistant", "content": resp})
                 st.rerun()
@@ -262,24 +287,28 @@ with t2:
             centro = [-12.0931, -77.0353]
 
             m_map = folium.Map(location=centro, zoom_start=13, tiles="CartoDB dark_matter")
-            folium.Marker(centro,
-                popup="📍 Tu ubicación (demo)",
-                tooltip="📍 Tu ubicación",
-                icon=folium.Icon(color="blue", icon="home", prefix="fa")
+            # CircleMarker evita el error de marker-icon.png en streamlit-folium
+            folium.CircleMarker(
+                centro, radius=10, color="#4FC3F7", fill=True, fill_color="#4FC3F7",
+                popup="📍 Tu ubicación (demo)", tooltip="📍 Tu ubicación (demo)"
             ).add_to(m_map)
 
+            color_map = {"green": "#00FF88", "red": "#FF4444", "orange": "#FFAA00"}
             for f in resultados:
                 if f["precio"] <= barato["precio"] * 1.03:
-                    color = "green"
+                    fcolor, label = "green", "💚 Más barato"
                 elif f["precio"] >= caro["precio"] * 0.97:
-                    color = "red"
+                    fcolor, label = "red", "🔴 Más caro"
                 else:
-                    color = "orange"
-                folium.Marker(
+                    fcolor, label = "orange", "🟡 Precio medio"
+                folium.CircleMarker(
                     [f["lat"], f["lng"]],
-                    popup=folium.Popup(f"<b>{f['nombre']}</b><br>S/ {f['precio']:.2f}", max_width=200),
-                    tooltip=f"{f['nombre']} — S/{f['precio']:.2f}",
-                    icon=folium.Icon(color=color, icon="plus-sign", prefix="glyphicon")
+                    radius=9,
+                    color=color_map[fcolor], fill=True, fill_color=color_map[fcolor], fill_opacity=0.85,
+                    popup=folium.Popup(
+                        f"<b>{f['nombre']}</b><br>{label}<br>S/ {f['precio']:.2f}<br>{f['horario']}", max_width=200
+                    ),
+                    tooltip=f"{f['nombre']} — S/{f['precio']:.2f}"
                 ).add_to(m_map)
 
             st_folium(m_map, width=700, height=400, returned_objects=[])
