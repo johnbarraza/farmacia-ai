@@ -56,8 +56,12 @@ function checkSpam(jid) {
 }
 
 function isAllowed(jid) {
-    if (jid.endsWith('@g.us')) return false;
-    if (jid.endsWith('@lid')) return jid === ownLid;
+    if (jid.endsWith('@g.us')) return false;  // grupos → siempre bloqueado
+    if (jid.endsWith('@lid')) {
+        // Sin whitelist → permitir TODOS los LID (usuarios reales en multi-device)
+        // Con whitelist → solo el propio LID (modo demo personal)
+        return !ALLOWED_NUMBERS || jid === ownLid;
+    }
     if (!ALLOWED_NUMBERS) return true;
     const number = jid.split('@')[0].split(':')[0].trim();
     return ALLOWED_NUMBERS.has(number);
