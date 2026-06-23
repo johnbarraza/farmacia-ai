@@ -60,7 +60,11 @@ st.markdown("""
 
 .stApp { background: #0F111A; }
 h1,h2,h3,h4 { font-family:'Space Grotesk',sans-serif !important; color:#FFFFFF !important; }
-p,li,span { font-family:'Inter',sans-serif !important; color:#C5C6C7; }
+/* scope to markdown content only — never touch Streamlit internal spans */
+[data-testid="stMarkdownContainer"] p,
+[data-testid="stMarkdownContainer"] li,
+[data-testid="stMarkdownContainer"] span,
+[data-testid="stCaptionContainer"] p { font-family:'Inter',sans-serif !important; color:#C5C6C7; }
 
 .stTabs [data-baseweb="tab-list"] { background:#0F111A; border-bottom:1px solid #1F2833; }
 .stTabs [data-baseweb="tab"] { background:transparent; color:#8696A0; padding:12px 24px; font-family:'Inter',sans-serif; }
