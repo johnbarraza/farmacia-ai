@@ -124,9 +124,10 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 c1, c2, c3 = st.columns(3)
-c1.metric("🏪 Farmacias Lima", "4,200+", "15 con precios en demo")
-c2.metric("💊 DIGEMID registrados", f"{len(digemid_db):,}", "20 con precios comparados")
-c3.metric("⚡ OCR receta", "< 5 seg", "Gemini Vision")
+c1.metric("🏪 Farmacias en Lima", "4,200+")
+c2.metric("💊 Registrados DIGEMID", f"{len(digemid_db):,}")
+c3.metric("⚡ OCR con Gemini Vision", "< 5 seg")
+st.caption("Demo activo: 15 farmacias con precios comparados · 20 medicamentos crónicos · Catálogo DIGEMID actualizado 19/06/2026")
 
 st.markdown("---")
 
@@ -141,13 +142,14 @@ with t1:
     if "messages" not in st.session_state:
         st.session_state.messages = [
             {"role": "assistant", "content": (
-                "👋 Hola! Soy **FarmaciaAI**, tu asistente de salud.\n\n"
-                "📸 Subí una foto de tu receta y te digo dónde comprar más barato.\n\n"
-                "O escribime:\n"
-                "- **PRECIOS** → comparar medicamentos\n"
-                "- **RIESGO** → test de diabetes\n"
-                "- **RECORDATORIOS** → activar alarmas\n"
-                "- **FAMILIAR** → alertas para tu familia"
+                "👋 Hola! Soy **FarmaciaAI** 💊\n\n"
+                "Te ayudo a **ahorrar en medicamentos** en Lima al instante.\n\n"
+                "1️⃣ 📸 **Foto de receta** → precios comparados\n"
+                "2️⃣ 🎤 **Audio** → describime el medicamento\n"
+                "3️⃣ 🗺️ **MAPA** → farmacias cercanas\n"
+                "4️⃣ 📊 **RIESGO** → test de diabetes (OMS)\n"
+                "5️⃣ 👨‍👩‍👧 **FAMILIAR** → alertas a tu familia\n\n"
+                "Subí una foto de tu receta o escribime para empezar 🚀"
             )}
         ]
 
@@ -415,7 +417,7 @@ with t3:
     st.markdown("### 📊 Test de Riesgo de Diabetes Tipo 2")
     st.caption("Cuestionario FINDRISC validado por la OMS. Sin análisis de sangre.")
 
-    with st.expander("ℹ️ ¿Qué es FINDRISC y en qué se basa?"):
+    with st.expander("Sobre FINDRISC — ¿qué es y en qué se basa?"):
         st.markdown("""
 **FINDRISC** (Finnish Diabetes Risk Score) es un cuestionario de 8 preguntas desarrollado por la
 **Asociación Finlandesa de Diabetes** y validado por la OMS para detectar riesgo de diabetes tipo 2
