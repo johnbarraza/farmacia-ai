@@ -208,7 +208,7 @@ with t1:
             key="receipt_upload"
         )
         if uploaded:
-            st.image(uploaded, caption="Receta cargada", use_column_width=True)
+            st.image(uploaded, caption="Receta cargada", width="stretch")
             if st.button("🔍 Analizar receta", use_container_width=True):
                 st.session_state.messages.append({"role": "user", "content": "📸 [Foto de receta]"})
                 t0 = time.time()
