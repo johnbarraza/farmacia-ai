@@ -332,6 +332,34 @@ with t2:
                 </div>""", unsafe_allow_html=True)
         st.markdown("---")
 
+    # ── Filtros ──────────────────────────────────────────────────────────────
+    todos_distritos = sorted(set(f["distrito"] for f in farmacias))
+    todas_cadenas   = sorted(set(f["cadena"] for f in farmacias))
+
+    fa, fb = st.columns([1, 1])
+    with fa:
+        distritos_sel = st.multiselect(
+            "📍 Filtrar por distrito",
+            options=todos_distritos,
+            default=[],
+            placeholder="Todos los distritos (15)"
+        )
+    with fb:
+        cadenas_sel = st.multiselect(
+            "🏪 Filtrar por cadena",
+            options=todas_cadenas,
+            default=[],
+            placeholder="Todas las cadenas (7)"
+        )
+
+    farmacias_filtradas = [
+        f for f in farmacias
+        if (not distritos_sel or f["distrito"] in distritos_sel)
+        and (not cadenas_sel or f["cadena"] in cadenas_sel)
+    ]
+    st.caption(f"Mostrando {len(farmacias_filtradas)} de 15 farmacias · "
+               f"Distritos: {', '.join(distritos_sel) if distritos_sel else 'todos'}")
+
     col1, col2 = st.columns([1, 2])
     with col1:
         med_sel = st.selectbox(
@@ -354,7 +382,7 @@ with t2:
             """, unsafe_allow_html=True)
 
     with col2:
-        resultados = buscar_precio_farmacia(med_sel, farmacias)
+        resultados = buscar_precio_farmacia(med_sel, farmacias_filtradas)
         if resultados:
             barato = resultados[0]
             caro   = resultados[-1]
