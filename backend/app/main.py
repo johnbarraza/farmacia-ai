@@ -245,16 +245,17 @@ async def whatsapp_webhook(msg: WhatsAppMessage):
                 nombre = m.get("nombre", "?")
                 dosis = f" {m['dosis']}" if m.get("dosis") else ""
                 frec  = f"\n   ⏰ {m['frecuencia']}" if m.get("frecuencia") else ""
-                cant  = f"\n   📦 {m['cantidad']}" if m.get("cantidad") else ""
+                cant  = f"\n   ctd. {m['cantidad']}" if m.get("cantidad") else ""
                 response_text += f"{i}. *{nombre}*{dosis}{frec}{cant}\n"
-            # Basket: qué farmacia tiene más medicamentos juntos al menor precio
+
+            # Basket: qué farmacia tiene más medicamentos juntos (precio+distancia)
             from ai.health_agents import buscar_precio_farmacia, fuzzy_med_id
             from collections import defaultdict
-            meds_catalog = json.loads((DATA_DIR / "medicamentos.json").read_text(encoding="utf-8"))["medicamentos"]
+            meds_catalog  = json.loads((DATA_DIR / "medicamentos.json").read_text(encoding="utf-8"))["medicamentos"]
             farmacias_data = json.loads((DATA_DIR / "farmacias_lima.json").read_text(encoding="utf-8"))
 
             total_meds = min(len(medicamentos), 3)
-            pharmacy_basket = defaultdict(lambda: {"meds": [], "total": 0.0, "info": None})
+            pharmacy_basket = defaultdict(lambda: {"meds": [], "total_efectivo": 0.0, "total_precio": 0.0, "info": None})
             meds_sin_precio = []
 
             for m in medicamentos[:3]:
@@ -271,44 +272,46 @@ async def whatsapp_webhook(msg: WhatsAppMessage):
                     pharmacy_basket[fid]["meds"].append(
                         {"nombre": nombre_m, "precio": p["precio"], "unidad": unidad}
                     )
-                    # total_efectivo incluye penalidad de distancia (S/0.50/km)
-                    pharmacy_basket[fid]["total_efectivo"] = \
-                        pharmacy_basket[fid].get("total_efectivo", 0.0) + p["precio_efectivo"]
-                    pharmacy_basket[fid]["total_precio"] = \
-                        pharmacy_basket[fid].get("total_precio", 0.0) + p["precio"]
+                    pharmacy_basket[fid]["total_efectivo"] += p["precio_efectivo"]
+                    pharmacy_basket[fid]["total_precio"]   += p["precio"]
                     if pharmacy_basket[fid]["info"] is None:
                         pharmacy_basket[fid]["info"] = p
 
-            # Ordenar: más medicamentos primero, luego menor precio+distancia
             sorted_baskets = sorted(
                 pharmacy_basket.items(),
-                key=lambda x: (-len(x[1]["meds"]), x[1].get("total_efectivo", 999))
+                key=lambda x: (-len(x[1]["meds"]), x[1]["total_efectivo"])
             )
 
             if sorted_baskets:
-                response_text += f"\n🏪 *¿Dónde comprar todo junto?*\n"
-                for fid, basket in sorted_baskets[:2]:
-                    info     = basket["info"]
-                    count    = len(basket["meds"])
-                    dist_km  = info.get("dist_km", 0)
-                    total_p  = basket.get("total_precio", 0.0)
-                    maps_url = (
-                        f"https://www.google.com/maps/dir/?api=1"
-                        f"&destination={info['lat']},{info['lng']}"
-                    )
-                    emoji = "🏆" if count == total_meds else "🔄"
+                # ── 1 recomendación clara + 1 backup (no más — paradoja de elección) ──
+                best_fid, best = sorted_baskets[0]
+                info    = best["info"]
+                dist_km = info.get("dist_km", 0)
+                maps_url = f"https://www.google.com/maps/dir/?api=1&destination={info['lat']},{info['lng']}"
+                count   = len(best["meds"])
+
+                response_text += f"\n✅ *Te recomendamos ir a:*\n"
+                response_text += f"*{info['nombre']}* — {dist_km:.1f} km\n"
+                for med in best["meds"]:
+                    response_text += f"   • {med['nombre']}: S/{med['precio']:.2f}/{med['unidad']}\n"
+                response_text += (
+                    f"   💰 Total: S/{best['total_precio']:.2f} ({count}/{total_meds} meds)\n"
+                    f"   📮 {info.get('direccion', '')}\n"
+                    f"   🗺️ {maps_url}\n"
+                )
+
+                if len(sorted_baskets) > 1:
+                    alt_fid, alt = sorted_baskets[1]
+                    alt_info = alt["info"]
+                    alt_maps = f"https://www.google.com/maps/dir/?api=1&destination={alt_info['lat']},{alt_info['lng']}"
                     response_text += (
-                        f"\n{emoji} *{info['nombre']}* — {count}/{total_meds} · {dist_km:.1f} km\n"
+                        f"\n_Si no tiene stock:_ {alt_info['nombre']} "
+                        f"({alt_info.get('dist_km',0):.1f} km) — "
+                        f"S/{alt['total_precio']:.2f} · {alt_maps}\n"
                     )
-                    for med in basket["meds"]:
-                        response_text += f"   • {med['nombre']}: S/{med['precio']:.2f}/{med['unidad']}\n"
-                    response_text += (
-                        f"   💰 Total medicamentos: S/{total_p:.2f}\n"
-                        f"   📮 {info.get('direccion', '')}\n"
-                        f"   🗺️ {maps_url}\n"
-                    )
+
                 if meds_sin_precio:
-                    response_text += f"\n⚠️ Sin precio en catálogo: {', '.join(meds_sin_precio)}\n"
+                    response_text += f"\n⚠️ Sin precio: {', '.join(meds_sin_precio)}\n"
             else:
                 response_text += (
                     "\n⚠️ Estos medicamentos no están en nuestro catálogo de precios.\n"
