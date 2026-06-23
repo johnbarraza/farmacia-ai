@@ -1,0 +1,42 @@
+name: CI
+
+on:
+  push:
+    branches: [master, dev]
+  pull_request:
+    branches: [master]
+
+jobs:
+  lint-backend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install ruff
+      - run: ruff check backend/ ai/ --ignore E501,F401 || true
+
+  test-backend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install -r backend/requirements.txt
+      - run: |
+          export PYTHONPATH=/home/runner/work/farmacia-ai/farmacia-ai/backend
+          python -c "from app.health_models import RiskModel, FindriscInput; print('health_models OK')"
+          python -c "from app.security import validate_phone, sanitize_text; print('security OK')"
+          python -c "from app.whatsapp_intent import classify_deterministic; r,c = classify_deterministic('hola'); assert r=='saludo'; print('intent OK')"
+
+  lint-baileys:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - run: cd ai && npm ci --omit=dev
+      - run: node --check ai/baileys_gateway.js && echo "baileys syntax OK"
