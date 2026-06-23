@@ -16,7 +16,8 @@
 | WhatsApp | +51 994 809 887 — manda foto de una receta |
 | Pitch deck | [docs/expo/pitch_farmaciaai.pdf](docs/expo/pitch_farmaciaai.pdf) |
 | Diagrama arquitectura | [docs/expo/arquitectura.html](docs/expo/arquitectura.html) |
-| Video demo | *(link YouTube/Loom — próximamente)* |
+| Video demo — Streamlit web | [Ver demo](https://drive.google.com/file/d/1U_8DdoHUw7ygSaYne7PW8aNfJZfpTuTP/view?usp=sharing) |
+| Video demo — Bot WhatsApp | [Ver demo](https://drive.google.com/file/d/1QZCEkH6WNhgfwyndTMTcrpG1x8W50-pa/view?usp=sharing) |
 
 ---
 
