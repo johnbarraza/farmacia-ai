@@ -42,8 +42,16 @@ def load_farmacias():
 def load_medicamentos():
     return json.loads(Path(DATA_DIR, "medicamentos.json").read_text(encoding="utf-8"))["medicamentos"]
 
+@st.cache_data
+def load_digemid():
+    p = Path(DATA_DIR, "digemid_index.json")
+    if p.exists():
+        return json.loads(p.read_text(encoding="utf-8"))
+    return []
+
 farmacias    = load_farmacias()
 meds_db      = load_medicamentos()
+digemid_db   = load_digemid()
 
 # ── CSS ──────────────────────────────────────────────────────────────────────
 st.markdown("""
@@ -116,9 +124,9 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 c1, c2, c3 = st.columns(3)
-c1.metric("🏪 Farmacias Lima", "15 (demo)")
-c2.metric("💊 Medicamentos", "20 genéricos")
-c3.metric("⚡ OCR receta", "< 3 seg")
+c1.metric("🏪 Farmacias Lima", "4,200+", "15 con precios en demo")
+c2.metric("💊 DIGEMID registrados", f"{len(digemid_db):,}", "20 con precios comparados")
+c3.metric("⚡ OCR receta", "< 5 seg", "Gemini Vision")
 
 st.markdown("---")
 
@@ -382,6 +390,23 @@ with t2:
             df.columns = ["Farmacia", "Cadena", "Distrito", "Precio (S/)"]
             df["Precio (S/)"] = df["Precio (S/)"].apply(lambda x: f"S/ {x:.2f}")
             st.dataframe(df, use_container_width=True, hide_index=True)
+
+    # ── Buscador DIGEMID ─────────────────────────────────────────────────────
+    st.markdown("---")
+    st.markdown("### 🔍 Buscador DIGEMID — Catálogo oficial de medicamentos Perú")
+    st.caption(f"Base de datos DIGEMID actualizada 19/06/2026 · {len(digemid_db):,} productos registrados")
+
+    query = st.text_input("Buscá por nombre o principio activo (IFA)", placeholder="ej: metformina, ibuprofeno, losartan...")
+    if query and len(query) >= 3:
+        q = query.upper().strip()
+        results = [p for p in digemid_db if q in p["nombre"] or q in p["ifa"]][:50]
+        if results:
+            df_dig = pd.DataFrame(results)[["nombre", "concent", "ifa", "rubro"]]
+            df_dig.columns = ["Producto", "Concentración", "Principio Activo (IFA)", "Rubro"]
+            st.dataframe(df_dig, use_container_width=True, hide_index=True)
+            st.caption(f"Mostrando {len(results)} de {sum(1 for p in digemid_db if q in p['nombre'] or q in p['ifa'])} coincidencias")
+        else:
+            st.info(f"No encontramos '{query}' en el catálogo DIGEMID.")
 
 # ═══════════════════════════════════════════════════════
 # TAB 3: RIESGO FINDRISC
