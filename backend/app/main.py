@@ -247,10 +247,26 @@ async def whatsapp_webhook(msg: WhatsAppMessage):
                 frec  = f"\n   ⏰ {m['frecuencia']}" if m.get("frecuencia") else ""
                 cant  = f"\n   📦 {m['cantidad']}" if m.get("cantidad") else ""
                 response_text += f"{i}. *{nombre}*{dosis}{frec}{cant}\n"
+            # Farmacia más barata del primer medicamento → link Google Maps
+            if medicamentos:
+                from ai.health_agents import buscar_precio_farmacia, fuzzy_med_id
+                farmacias_data = json.loads((DATA_DIR / "farmacias_lima.json").read_text(encoding="utf-8"))
+                primer_med = medicamentos[0].get("nombre", "")
+                med_id = fuzzy_med_id(primer_med, []) if primer_med else None
+                precios = buscar_precio_farmacia(med_id, farmacias_data) if med_id else []
+                if precios:
+                    f_barata = precios[0]
+                    maps_url = f"https://www.google.com/maps/dir/?api=1&destination={f_barata['lat']},{f_barata['lng']}"
+                    response_text += (
+                        f"\n\n📍 *Más barato:* {f_barata['nombre']}\n"
+                        f"📮 {f_barata.get('direccion', '')}\n"
+                        f"🗺️ {maps_url}"
+                    )
+
             remaining = remaining_free(session) - 1
             if not session["unlocked"] and remaining > 0:
-                response_text += f"\n_(Te quedan {remaining} consultas gratis)_"
-            response_text += "\n¿Querés ver dónde comprarlos más barato? Escribí MAPA."
+                response_text += f"\n\n_(Te quedan {remaining} consultas gratis)_"
+            response_text += "\n\n¿Querés *RECORDATORIOS* para estas pastillas? Escribí SI."
         else:
             response_text = "❌ No pude leer la receta. ¿Podés mandar otra foto con mejor luz?"
 

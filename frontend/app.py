@@ -403,23 +403,37 @@ with t2:
                     fcolor, label = "red", "🔴 Más caro"
                 else:
                     fcolor, label = "orange", "🟡 Precio medio"
+                maps_url = f"https://www.google.com/maps/dir/?api=1&destination={f['lat']},{f['lng']}"
+                popup_html = (
+                    f"<b>{f['nombre']}</b><br>"
+                    f"{label} — <b>S/ {f['precio']:.2f}</b><br>"
+                    f"{f.get('direccion','')}<br>"
+                    f"{f['horario']}<br><br>"
+                    f"<a href='{maps_url}' target='_blank' style='color:#00D4FF;'>📍 Cómo llegar (Google Maps)</a>"
+                )
                 folium.CircleMarker(
                     [f["lat"], f["lng"]],
                     radius=9,
                     color=color_map[fcolor], fill=True, fill_color=color_map[fcolor], fill_opacity=0.85,
-                    popup=folium.Popup(
-                        f"<b>{f['nombre']}</b><br>{label}<br>S/ {f['precio']:.2f}<br>{f['horario']}", max_width=200
-                    ),
+                    popup=folium.Popup(popup_html, max_width=250),
                     tooltip=f"{f['nombre']} — S/{f['precio']:.2f}"
                 ).add_to(m_map)
 
             st_folium(m_map, width=700, height=400, returned_objects=[])
-            st.caption("💚 Verde = más barato · 🔴 Rojo = más caro · 📍 Ubicación demo (San Isidro)")
+            st.caption("💚 Verde = más barato · 🔴 Rojo = más caro · Clic en marcador → dirección + Google Maps")
 
-            df = pd.DataFrame(resultados)[["nombre", "cadena", "distrito", "precio"]]
-            df.columns = ["Farmacia", "Cadena", "Distrito", "Precio (S/)"]
+            df = pd.DataFrame(resultados)[["nombre", "cadena", "distrito", "direccion", "precio"]]
+            df.columns = ["Farmacia", "Cadena", "Distrito", "Dirección", "Precio (S/)"]
             df["Precio (S/)"] = df["Precio (S/)"].apply(lambda x: f"S/ {x:.2f}")
-            st.dataframe(df, use_container_width=True, hide_index=True)
+            df["Maps"] = [f"https://www.google.com/maps/dir/?api=1&destination={r['lat']},{r['lng']}" for r in resultados]
+            st.dataframe(
+                df,
+                use_container_width=True,
+                hide_index=True,
+                column_config={
+                    "Maps": st.column_config.LinkColumn("📍 Google Maps", display_text="Cómo llegar")
+                }
+            )
 
     # ── Buscador DIGEMID ─────────────────────────────────────────────────────
     st.markdown("---")
