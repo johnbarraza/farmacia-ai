@@ -15,7 +15,7 @@ import os
 FREE_CONSULTATIONS = int(os.getenv("FREE_CONSULTATIONS", "3"))
 UNLOCK_CODE = "homework-startup"
 RESET_CODE  = "reset-demo"   # código secreto para reiniciar consultas en pruebas
-SUBSCRIBE_URL = "https://saludapp-peru.streamlit.app"
+SUBSCRIBE_URL = "https://farmacia-ai.streamlit.app"
 
 
 def _path(phone: str) -> Path:

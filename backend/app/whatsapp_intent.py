@@ -27,20 +27,20 @@ INTENT_RESPONSES = {
     "mapa": (
         "🗺️ *Mapa de farmacias en Lima*\n\n"
         "Compará precios de genéricos en 15 farmacias:\n"
-        "👉 https://saludapp-peru.streamlit.app\n\n"
+        "👉 https://farmacia-ai.streamlit.app\n\n"
         "_(Tab Precios → elegí el medicamento)_"
     ),
     "riesgo": (
         "📊 *Test de Riesgo de Diabetes*\n\n"
         "Cuestionario FINDRISC validado por la OMS.\n"
         "Sin análisis de sangre. Resultado en 2 minutos.\n\n"
-        "👉 https://saludapp-peru.streamlit.app\n"
+        "👉 https://farmacia-ai.streamlit.app\n"
         "_(Tab Riesgo Diabetes)_"
     ),
     "reporte": (
         "📄 *Reporte para tu médico*\n\n"
         "Descargá tu informe PDF con tu historial y riesgo.\n\n"
-        "👉 https://saludapp-peru.streamlit.app\n"
+        "👉 https://farmacia-ai.streamlit.app\n"
         "_(Tab Riesgo → botón Descargar PDF)_"
     ),
     "recordatorios": (
