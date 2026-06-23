@@ -370,14 +370,20 @@ with t2:
         med_info = next((m for m in meds_db if m["id"] == med_sel), None)
         if med_info:
             ahorro_pct = int((1 - med_info["precio_generico_min"] / med_info["precio_marca"]) * 100)
+            unidad     = med_info.get("presentacion", "unidad").lower()
+            caja30_min = med_info["precio_generico_min"] * 30
+            caja30_max = med_info["precio_generico_max"] * 30
+            caja30_marca = med_info["precio_marca"] * 30
             st.markdown(f"""
             <div class="card">
                 <h4>{med_info['nombre']}</h4>
                 <small style="color:#8696A0;">{med_info['grupo']} · {med_info['frecuencia_tipica']}</small>
                 <hr style="border-color:#2D3142;">
-                <p>💚 <b style="color:#00FF88;">Genérico: S/{med_info['precio_generico_min']:.2f}–{med_info['precio_generico_max']:.2f}</b></p>
-                <p>🔴 <b style="color:#FF4444;">Marca ({med_info['marca_referencia']}): S/{med_info['precio_marca']:.2f}</b></p>
-                <p style="color:#00D4FF;font-size:1.1em;font-weight:700;">Ahorrás hasta {ahorro_pct}%</p>
+                <p>💚 <b style="color:#00FF88;">Genérico: S/{med_info['precio_generico_min']:.2f}–{med_info['precio_generico_max']:.2f} / {unidad}</b><br>
+                <small style="color:#8696A0;">Caja 30 {unidad}s ≈ S/{caja30_min:.2f}–{caja30_max:.2f}</small></p>
+                <p>🔴 <b style="color:#FF4444;">Marca ({med_info['marca_referencia']}): S/{med_info['precio_marca']:.2f} / {unidad}</b><br>
+                <small style="color:#8696A0;">Caja 30 ≈ S/{caja30_marca:.2f}</small></p>
+                <p style="color:#00D4FF;font-size:1.1em;font-weight:700;">Ahorrás hasta {ahorro_pct}% comprando genérico</p>
             </div>
             """, unsafe_allow_html=True)
 
@@ -422,9 +428,10 @@ with t2:
             st_folium(m_map, width=700, height=400, returned_objects=[])
             st.caption("💚 Verde = más barato · 🔴 Rojo = más caro · Clic en marcador → dirección + Google Maps")
 
+            unidad_tabla = med_info.get("presentacion", "unidad").lower() if med_info else "unidad"
             df = pd.DataFrame(resultados)[["nombre", "cadena", "distrito", "direccion", "precio"]]
-            df.columns = ["Farmacia", "Cadena", "Distrito", "Dirección", "Precio (S/)"]
-            df["Precio (S/)"] = df["Precio (S/)"].apply(lambda x: f"S/ {x:.2f}")
+            df.columns = ["Farmacia", "Cadena", "Distrito", "Dirección", f"Precio/  {unidad_tabla}"]
+            df[f"Precio/  {unidad_tabla}"] = df[f"Precio/  {unidad_tabla}"].apply(lambda x: f"S/ {x:.2f}")
             df["Maps"] = [f"https://www.google.com/maps/dir/?api=1&destination={r['lat']},{r['lng']}" for r in resultados]
             st.dataframe(
                 df,
