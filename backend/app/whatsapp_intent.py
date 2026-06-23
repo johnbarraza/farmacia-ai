@@ -15,22 +15,49 @@ from openai import AsyncOpenAI
 
 INTENT_RESPONSES = {
     "saludo": (
-        "👋 ¡Hola! Soy *SaludApp*, tu asistente de salud en Lima 💊\n\n"
-        "Puedo ayudarte con:\n"
-        "📸 *Foto de receta* → te digo dónde comprar más barato\n"
-        "🎤 *Audio* → describime el medicamento que buscás\n"
-        "📊 *RIESGO* → calculá tu riesgo de diabetes\n"
+        "👋 ¡Hola! Soy *FarmaciaAI* 💊\n\n"
+        "Te ayudo a *ahorrar en medicamentos* en Lima al instante.\n\n"
+        "📸 *Foto de receta* → dónde comprar más barato\n"
+        "🎤 *Audio* → describime el medicamento\n"
         "🗺️ *MAPA* → farmacias cercanas con precios\n"
-        "📄 *REPORTE* → descargá tu informe en PDF\n\n"
-        "¿Empezamos? Mandame una foto de tu receta o contame qué necesitás 🙌"
+        "📊 *RIESGO* → test de diabetes (OMS, gratis)\n"
+        "👨‍👩‍👧 *FAMILIAR* → alertas para tu familia\n\n"
+        "¡Mandame una foto de tu receta y empezamos! 🚀"
     ),
-    "mapa":   "🗺️ Mapa de farmacias y precios: https://saludapp-peru.streamlit.app (tab Precios)",
-    "riesgo": "📊 Calculá tu riesgo de diabetes: https://saludapp-peru.streamlit.app (tab Riesgo)",
-    "reporte":"📄 Descargá tu reporte PDF: https://saludapp-peru.streamlit.app (tab Riesgo → descargar PDF)",
-    "recordatorios": "✅ Recordatorios activados. Te voy a avisar cada día con tus medicamentos.",
-    "familiar": "👨‍👩‍👧 Plan Familiar: 7 días gratis, luego S/11.90/mes. ¿Cuál es el WhatsApp de tu familiar?",
-    "receta": "📸 ¡Perfecto! Mandame la foto de la receta y la proceso.",
-    "precio": "💊 ¿De qué medicamento querés el precio? Mandame la foto de la receta o el nombre exacto.",
+    "mapa": (
+        "🗺️ *Mapa de farmacias en Lima*\n\n"
+        "Compará precios de genéricos en 15 farmacias:\n"
+        "👉 https://saludapp-peru.streamlit.app\n\n"
+        "_(Tab Precios → elegí el medicamento)_"
+    ),
+    "riesgo": (
+        "📊 *Test de Riesgo de Diabetes*\n\n"
+        "Cuestionario FINDRISC validado por la OMS.\n"
+        "Sin análisis de sangre. Resultado en 2 minutos.\n\n"
+        "👉 https://saludapp-peru.streamlit.app\n"
+        "_(Tab Riesgo Diabetes)_"
+    ),
+    "reporte": (
+        "📄 *Reporte para tu médico*\n\n"
+        "Descargá tu informe PDF con tu historial y riesgo.\n\n"
+        "👉 https://saludapp-peru.streamlit.app\n"
+        "_(Tab Riesgo → botón Descargar PDF)_"
+    ),
+    "recordatorios": (
+        "⏰ *Recordatorios de medicamentos*\n\n"
+        "✅ Activados. Te aviso todos los días:\n"
+        "☀️ 8:00 AM — pastilla con desayuno\n"
+        "🌙 9:00 PM — pastilla con cena\n\n"
+        "_(En producción: llegás por WhatsApp. Aquí es demo.)_"
+    ),
+    "familiar": (
+        "👨‍👩‍👧 *Plan Familiar*\n\n"
+        "Tu familiar recibe una alerta si olvidás tomar tus pastillas.\n\n"
+        "🎁 7 días gratis → después S/14.90/mes\n\n"
+        "¿Cuál es el número de WhatsApp de tu familiar?"
+    ),
+    "receta": "📸 ¡Perfecto! Mandame la foto de la receta y la proceso al instante. ✨",
+    "precio": "💊 ¿De qué medicamento necesitás el precio? Mandame la foto de la receta o escribí el nombre.",
     "ayuda":  "🆘 Puedo ayudarte con:\n• Foto de receta → precios en farmacias\n• MAPA → farmacias cerca\n• RIESGO → test de diabetes\n• REPORTE → PDF de tu salud\n• FAMILIAR → plan familiar",
     "gracias": "😊 ¡De nada! ¿Necesitás algo más?",
     "otro":   "No entendí bien. Escribí AYUDA para ver qué puedo hacer, o mandame una foto de tu receta.",
