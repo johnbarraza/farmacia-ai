@@ -240,10 +240,13 @@ async def whatsapp_webhook(msg: WhatsAppMessage):
         intent_source = "deterministic"
 
         if medicamentos:
-            response_text = f"💊 Encontré {len(medicamentos)} medicamento(s):\n"
-            for m in medicamentos[:5]:
+            response_text = f"💊 *{len(medicamentos)} medicamento(s) en tu receta:*\n\n"
+            for i, m in enumerate(medicamentos[:5], 1):
                 nombre = m.get("nombre", "?")
                 dosis = f" {m['dosis']}" if m.get("dosis") else ""
+                frec  = f"\n   ⏰ {m['frecuencia']}" if m.get("frecuencia") else ""
+                cant  = f"\n   📦 {m['cantidad']}" if m.get("cantidad") else ""
+                response_text += f"{i}. *{nombre}*{dosis}{frec}{cant}\n"
                 response_text += f"• {nombre}{dosis}\n"
             remaining = remaining_free(session) - 1
             if not session["unlocked"] and remaining > 0:

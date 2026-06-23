@@ -17,11 +17,11 @@ INTENT_RESPONSES = {
     "saludo": (
         "👋 ¡Hola! Soy *FarmaciaAI* 💊\n\n"
         "Te ayudo a *ahorrar en medicamentos* en Lima al instante.\n\n"
-        "📸 *Foto de receta* → dónde comprar más barato\n"
-        "🎤 *Audio* → describime el medicamento\n"
-        "🗺️ *MAPA* → farmacias cercanas con precios\n"
-        "📊 *RIESGO* → test de diabetes (OMS, gratis)\n"
-        "👨‍👩‍👧 *FAMILIAR* → alertas para tu familia\n\n"
+        "1️⃣ 📸 *Foto de receta* → precios comparados\n"
+        "2️⃣ 🎤 *Audio* → describime el medicamento\n"
+        "3️⃣ 🗺️ *MAPA* → farmacias cercanas\n"
+        "4️⃣ 📊 *RIESGO* → test de diabetes (OMS)\n"
+        "5️⃣ 👨‍👩‍👧 *FAMILIAR* → alertas a tu familia\n\n"
         "¡Mandame una foto de tu receta y empezamos! 🚀"
     ),
     "mapa": (
