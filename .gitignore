@@ -4,3 +4,6 @@ __pycache__/
 .streamlit/secrets.toml
 *.egg-info/
 node_modules/
+.planning/
+data/sessions/
+ai/whatsapp_auth/
