@@ -420,7 +420,9 @@ with t2:
             """, unsafe_allow_html=True)
 
     with col2:
-        resultados = buscar_precio_farmacia(med_sel, farmacias_filtradas)
+        # Si hay filtro activo de distrito/cadena, mostrar todo sin límite de km
+        max_km_busqueda = 999.0 if (distritos_sel or cadenas_sel) else 5.0
+        resultados = buscar_precio_farmacia(med_sel, farmacias_filtradas, max_km=max_km_busqueda)
         if resultados:
             barato = resultados[0]
             caro   = resultados[-1]
