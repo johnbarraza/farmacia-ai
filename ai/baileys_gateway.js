@@ -1,5 +1,5 @@
 /**
- * SaludApp Peru — WhatsApp Gateway con Baileys
+ * FarmaciaAI — WhatsApp Gateway con Baileys
  *
  * PARA USAR:
  *   1. Asegurate que FastAPI esté corriendo: uvicorn backend.app.main:app --port 8000
@@ -72,14 +72,13 @@ async function startBot() {
 
     const sock = makeWASocket({
         auth: state,
-        browser: ['SaludApp Peru', 'Chrome', '1.0'],
+        browser: ['FarmaciaAI', 'Chrome', '1.0'],
     });
 
     sock.ev.on('creds.update', saveCreds);
 
     // Manejar mensajes entrantes
     sock.ev.on('messages.upsert', async ({ messages, type }) => {
-        console.log(`[DEBUG] messages.upsert type=${type} count=${messages.length} jids=${messages.map(m=>m.key?.remoteJid).join(',')}`);
         if (type !== 'notify' && type !== 'append') return;
 
         for (const msg of messages) {
@@ -126,15 +125,11 @@ async function startBot() {
             let audioBase64 = null;
 
             // Extraer texto
-            const msgType = getContentType(msg.message);
-            console.log(`[DEBUG] msgType=${msgType} keys=${Object.keys(msg.message).join(',')}`);
-            console.log(`[DEBUG] msg.message=`, JSON.stringify(msg.message).slice(0, 300));
             const conv = msg.message.conversation;
             const extText = msg.message.extendedTextMessage?.text;
             const ephText = msg.message.ephemeralMessage?.message?.conversation
                          || msg.message.ephemeralMessage?.message?.extendedTextMessage?.text;
             text = conv || extText || ephText || '';
-            console.log(`[DEBUG] text extracted: "${text}"`);
 
             // Extraer imagen
             const imageMsg = msg.message.imageMessage;
@@ -259,7 +254,7 @@ function httpRequest(path, body) {
     });
 }
 
-console.log('💊 SaludApp Peru — WhatsApp Gateway');
+console.log('💊 FarmaciaAI — WhatsApp Gateway');
 console.log('==================================\n');
 console.log('⚠️  Asegurate que FastAPI esté corriendo:');
 console.log('   uvicorn backend.app.main:app --port 8000\n');
