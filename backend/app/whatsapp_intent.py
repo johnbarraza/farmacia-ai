@@ -49,7 +49,9 @@ _EXACT: dict[str, str] = {
     "recordatorios": "recordatorios", "recordatorio": "recordatorios",
     "familiar": "familiar", "alertas": "familiar",
     "ayuda": "ayuda", "help": "ayuda", "menu": "ayuda",
-    "gracias": "gracias", "gracias!": "gracias", "ty": "gracias",
+    "que puedes hacer": "ayuda", "que haces": "ayuda", "como funciona": "ayuda",
+    "que eres": "ayuda", "para que sirves": "ayuda", "que puedes": "ayuda",
+    "gracias": "gracias", "gracias!": "gracias", "ty": "gracias", "dale": "gracias",
 }
 
 # Patrones regex (confianza 0.9)
