@@ -247,7 +247,6 @@ async def whatsapp_webhook(msg: WhatsAppMessage):
                 frec  = f"\n   ⏰ {m['frecuencia']}" if m.get("frecuencia") else ""
                 cant  = f"\n   📦 {m['cantidad']}" if m.get("cantidad") else ""
                 response_text += f"{i}. *{nombre}*{dosis}{frec}{cant}\n"
-                response_text += f"• {nombre}{dosis}\n"
             remaining = remaining_free(session) - 1
             if not session["unlocked"] and remaining > 0:
                 response_text += f"\n_(Te quedan {remaining} consultas gratis)_"

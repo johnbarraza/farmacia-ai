@@ -61,22 +61,24 @@ def validate_and_normalize(nombre: str) -> tuple[str, bool]:
     if nombre_up in nombres_cat:
         return nombre_up, True
 
-    # Match en IFA (principio activo)
+    # Substring match en IFA (Hiosina ⊂ Hioscina)
     for ifa, prod_nombre in ifas_cat.items():
-        if nombre_up in ifa or ifa.startswith(nombre_up[:6]):
+        if nombre_up in ifa:
             return prod_nombre, True
 
-    # Fuzzy sobre nombres completos (cutoff 0.60)
-    matches = get_close_matches(nombre_up, nombres_cat, n=1, cutoff=0.60)
+    # Fuzzy conservador (cutoff 0.80 — evita Hiosina→Hidrosona)
+    matches = get_close_matches(nombre_up, nombres_cat, n=1, cutoff=0.80)
     if matches:
         return matches[0], True
 
-    # Fuzzy sobre IFAs (principios activos)
-    matches = get_close_matches(nombre_up, list(ifas_cat.keys()), n=1, cutoff=0.55)
+    # IFA fuzzy conservador
+    matches = get_close_matches(nombre_up, list(ifas_cat.keys()), n=1, cutoff=0.80)
     if matches:
         return ifas_cat[matches[0]], True
 
-    return nombre, False  # no encontrado en DIGEMID → probablemente no es medicamento
+    # No encontrado en DIGEMID → mantener nombre original y asumir válido
+    # (Gemini conoce más medicamentos que DIGEMID local)
+    return nombre, True
 
 
 # ─── OCR PRINCIPAL ────────────────────────────────────────────────────────────
