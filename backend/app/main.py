@@ -177,9 +177,11 @@ async def whatsapp_webhook(msg: WhatsAppMessage):
     intent_used = "unknown"
     intent_source = "deterministic"
 
-    # ── 1. Onboarding en curso → prioridad máxima ─────────────────────────
+    # ── 1. Onboarding en curso → solo si no es un comando de navegación ──────
+    _NAV_COMMANDS = {"mapa","riesgo","reporte","recordatorios","familiar","ayuda",
+                     "precios","precio","hola","saludo","1","2","3","4"}
     if session.get("onboard_step") and session["onboard_step"] not in (None, "done"):
-        if msg.text:
+        if msg.text and msg.text.strip().lower() not in _NAV_COMMANDS:
             resp = handle_onboard_input(session, msg.text)
             if resp:
                 return {"response": resp, "medicamentos": [], "_debug": {"intent": "onboarding"}}
@@ -259,8 +261,9 @@ async def whatsapp_webhook(msg: WhatsAppMessage):
         intent_used, confidence, intent_source = await classify_intent(msg.text)
         response_text = intent_to_response(intent_used)
 
-        # Solo contar si es consulta real (no navegación de menú)
-        NON_BILLABLE = {"saludo", "gracias", "ayuda"}
+        # Solo cobrar OCR real (imagen/audio) — texto es gratis
+        NON_BILLABLE = {"saludo", "gracias", "ayuda", "mapa", "riesgo",
+                        "reporte", "recordatorios", "familiar", "otro"}
         if intent_used not in NON_BILLABLE:
             record_consultation(session)
             save_session(session)
