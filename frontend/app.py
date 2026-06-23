@@ -110,6 +110,32 @@ div[data-testid="stMetric"] [data-testid="stMetricValue"] { color:#00D4FF !impor
     margin:0 auto; font-family:'Space Grotesk',sans-serif;
 }
 #MainMenu, footer, header[data-testid="stHeader"] { visibility:hidden; }
+
+/* ── Fix: file uploader "uploadpload" overlap ── */
+[data-testid="stFileUploaderDropzoneInstructions"] { display:none !important; }
+[data-testid="stFileUploaderDropzone"] {
+    padding: 10px 8px !important;
+    justify-content: center !important;
+}
+[data-testid="stFileUploaderDropzone"] button {
+    width: 100% !important;
+    background: #1A1C28 !important;
+    color: #00D4FF !important;
+    border: 1px dashed #00D4FF !important;
+    border-radius: 8px !important;
+    font-weight: 600 !important;
+}
+
+/* ── Fix: expander text overlap in Riesgo tab ── */
+details[data-testid="stExpander"] > summary {
+    position: relative !important;
+    z-index: 1 !important;
+    padding: 10px 12px !important;
+}
+details[data-testid="stExpander"] > summary span {
+    position: static !important;
+    color: #C5C6C7 !important;
+}
 </style>
 """, unsafe_allow_html=True)
 
@@ -153,7 +179,7 @@ with t1:
             )}
         ]
 
-    col_chat, col_upload = st.columns([3, 1])
+    col_chat, col_upload = st.columns([3, 2])
 
     with col_upload:
         st.markdown("**📸 Subir receta**")
