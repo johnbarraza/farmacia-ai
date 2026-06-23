@@ -362,7 +362,46 @@ with t2:
                     <b style="color:#00FF88;font-size:1.1em;">{precio_str}</b><br>
                     <small style="color:#8696A0;">más barato</small>
                 </div>""", unsafe_allow_html=True)
-        st.markdown("---")
+        # ── Basket: mejor farmacia para TODA la receta ──────────────────────
+        from collections import defaultdict
+        total_meds_ocr = min(len(ocr_meds), 3)
+        ph_basket = defaultdict(lambda: {"meds": [], "total_efectivo": 0.0, "total_precio": 0.0, "info": None})
+        for m in ocr_meds[:3]:
+            nombre_m = m.get("nombre", "?")
+            med_id   = fuzzy_med_id(nombre_m, meds_db)
+            precios  = buscar_precio_farmacia(med_id, farmacias, max_km=15.0)
+            cat_info = next((x for x in meds_db if x["id"] == med_id), None)
+            unidad   = cat_info.get("presentacion", "unidad").lower() if cat_info else "unidad"
+            for p in precios:
+                fid = p["farmacia_id"]
+                ph_basket[fid]["meds"].append({"nombre": nombre_m, "precio": p["precio"], "unidad": unidad})
+                ph_basket[fid]["total_efectivo"] += p["precio_efectivo"]
+                ph_basket[fid]["total_precio"]   += p["precio"]
+                if ph_basket[fid]["info"] is None:
+                    ph_basket[fid]["info"] = p
+
+        sorted_ph = sorted(ph_basket.items(), key=lambda x: (-len(x[1]["meds"]), x[1]["total_efectivo"]))
+        if sorted_ph:
+            st.markdown("**🏪 Mejor farmacia para toda la receta:**")
+            bcols = st.columns(min(len(sorted_ph), 2))
+            for i, (fid, bk) in enumerate(sorted_ph[:2]):
+                info  = bk["info"]
+                count = len(bk["meds"])
+                dist  = info.get("dist_km", 0)
+                maps_url = f"https://www.google.com/maps/dir/?api=1&destination={info['lat']},{info['lng']}"
+                emoji = "🏆" if count == total_meds_ocr else "🔄"
+                meds_html = "".join(f"• {md['nombre']}: S/{md['precio']:.2f}/{md['unidad']}<br>" for md in bk["meds"])
+                with bcols[i]:
+                    st.markdown(f"""<div class="card">
+                        <b style="color:#00D4FF;">{emoji} {info['nombre']}</b><br>
+                        <small style="color:#8696A0;">{count}/{total_meds_ocr} medicamentos · {dist:.1f} km</small><br><br>
+                        {meds_html}<br>
+                        <b style="color:#00FF88;">Total: S/{bk['total_precio']:.2f}</b><br>
+                        <small style="color:#8696A0;">{info.get('direccion','')}</small><br><br>
+                        <a href="{maps_url}" target="_blank" style="color:#00D4FF;">📍 Cómo llegar (Google Maps)</a>
+                    </div>""", unsafe_allow_html=True)
+
+    st.markdown("---")
 
     # ── Filtros ──────────────────────────────────────────────────────────────
     todos_distritos = sorted(set(f["distrito"] for f in farmacias))

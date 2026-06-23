@@ -309,6 +309,13 @@ async def whatsapp_webhook(msg: WhatsAppMessage):
                     )
                 if meds_sin_precio:
                     response_text += f"\n⚠️ Sin precio en catálogo: {', '.join(meds_sin_precio)}\n"
+            else:
+                response_text += (
+                    "\n⚠️ Estos medicamentos no están en nuestro catálogo de precios.\n"
+                    "Buscá precios en:\n"
+                    "🌐 https://farmacia-ai.streamlit.app\n"
+                    "📋 https://www.digemid.minsa.gob.pe"
+                )
 
             remaining = remaining_free(session) - 1
             if not session["unlocked"] and remaining > 0:
