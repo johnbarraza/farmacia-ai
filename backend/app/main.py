@@ -21,6 +21,10 @@ app.add_middleware(
 
 DATA_DIR = Path(__file__).resolve().parents[2] / "data"
 
+# ── Datos cargados una sola vez al arrancar (evita leer disco por mensaje) ────
+_MEDS_CATALOG  = json.loads((DATA_DIR / "medicamentos.json").read_text(encoding="utf-8"))["medicamentos"]
+_FARMACIAS     = json.loads((DATA_DIR / "farmacias_lima.json").read_text(encoding="utf-8"))
+
 
 # ── Schemas ──────────────────────────────────────────────────────────────────
 
@@ -251,8 +255,8 @@ async def whatsapp_webhook(msg: WhatsAppMessage):
             # Basket: qué farmacia tiene más medicamentos juntos (precio+distancia)
             from ai.health_agents import buscar_precio_farmacia, fuzzy_med_id
             from collections import defaultdict
-            meds_catalog  = json.loads((DATA_DIR / "medicamentos.json").read_text(encoding="utf-8"))["medicamentos"]
-            farmacias_data = json.loads((DATA_DIR / "farmacias_lima.json").read_text(encoding="utf-8"))
+            meds_catalog   = _MEDS_CATALOG
+            farmacias_data = _FARMACIAS
 
             total_meds = min(len(medicamentos), 3)
             pharmacy_basket = defaultdict(lambda: {"meds": [], "total_efectivo": 0.0, "total_precio": 0.0, "info": None})
