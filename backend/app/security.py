@@ -72,8 +72,8 @@ def is_injection(text: str) -> bool:
 
 def validate_phone(phone: str) -> bool:
     """Valida que el JID de WhatsApp tenga formato básico correcto."""
-    # Formato: número@s.whatsapp.net o número@g.us (grupos)
-    return bool(re.match(r"^\d{7,15}@(s\.whatsapp\.net|g\.us)$", phone))
+    # Acepta: @s.whatsapp.net (personal), @lid (multi-device LID), @g.us (grupos)
+    return bool(re.match(r"^\d{7,20}(@s\.whatsapp\.net|@lid|@g\.us)$", phone))
 
 
 # ── Wrapper seguro para texto hacia LLM ──────────────────────────────────────
