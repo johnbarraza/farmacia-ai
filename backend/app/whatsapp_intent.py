@@ -67,7 +67,7 @@ INTENT_RESPONSES = {
 
 # Matches exactos (confianza 1.0)
 _EXACT: dict[str, str] = {
-    "1": "recordatorios", "2": "mapa", "3": "riesgo", "4": "reporte",
+    "1": "receta", "2": "receta", "3": "mapa", "4": "riesgo", "5": "familiar",
     "hola": "saludo", "hi": "saludo", "buenas": "saludo",
     "buenos dias": "saludo", "buenas tardes": "saludo", "buenas noches": "saludo",
     "mapa": "mapa", "farmacias": "mapa",

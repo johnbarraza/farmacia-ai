@@ -4,7 +4,19 @@
 
 🌐 **Demo:** [farmacia-ai.streamlit.app](https://farmacia-ai.streamlit.app) · 📱 **Bot WhatsApp:** +51 994 809 887
 
-> Surgió como la idea ganadora (score 80/100) del torneo de validación de startups YC del repositorio **[hw7_ds](https://github.com/JohnxBar/hw7_ds)** — un pipeline de agentes que evalúa ideas usando la metodología de Y Combinator.
+> Surgió como la idea ganadora (score 80/100) del torneo de validación YC del repositorio **[hw7_ds](https://github.com/JohnxBar/hw7_ds)** — pipeline de agentes que evalúa ideas con metodología Y Combinator.
+
+---
+
+## Demo en vivo
+
+| Canal | Link |
+|---|---|
+| Web | [farmacia-ai.streamlit.app](https://farmacia-ai.streamlit.app) |
+| WhatsApp | +51 994 809 887 — manda foto de una receta |
+| Pitch deck | [docs/expo/pitch_farmaciaai.pdf](docs/expo/pitch_farmaciaai.pdf) |
+| Diagrama arquitectura | [docs/expo/arquitectura.html](docs/expo/arquitectura.html) |
+| Video demo | *(link YouTube/Loom — próximamente)* |
 
 ---
 
@@ -14,14 +26,25 @@
 |---|---|
 | Bot WhatsApp — recibe fotos, texto y audio | Baileys (Node.js) |
 | OCR receta médica → medicamentos + precios | Gemini Vision |
-| Clasificador de intents híbrido | Determinista + DeepSeek LLM |
-| Audio → transcripción → respuesta | Gemini 1.5 Flash |
-| Mapa farmacias + precios Lima | Folium |
+| Clasificador de intents híbrido | Determinista + DeepSeek V3 |
+| Precio/unidad (tableta, cápsula) + caja 30u | Pandas |
+| Mapa farmacias + precios Lima (15 distritos) | Folium |
 | Score riesgo diabetes | FINDRISC (OMS) |
 | Freemium: 3 consultas gratis → suscripción | Sesiones JSON por usuario |
-| Onboarding conversacional (edad + género) | FastAPI + Baileys |
 | Seguridad: rate limiting, prompt injection | `security.py` |
 | UI web | Streamlit |
+
+---
+
+## Herramientas del curso usadas
+
+| Herramienta | Lectura | Dónde en el código |
+|---|---|---|
+| Gemini Vision — OCR de recetas | L14 | `backend/app/ocr.py` |
+| Baileys / OpenClaw — bot WhatsApp | L15 | `whatsapp/bot.js` |
+| DeepSeek V3 — clasificación intents | L10-11 | `backend/app/intent.py` |
+| Folium + mapas GIS | L3-7 | `frontend/app.py` → tab Mapa |
+| Claude Code — CTO virtual | L15 | todo el repo |
 
 ---
 
@@ -45,6 +68,15 @@ docker compose up --build
 
 ---
 
+## Validación del problema
+
+5 entrevistas con pacientes crónicos (diabéticos, hipertensos) realizadas entre el 12 y 20 de junio de 2026.
+Ver `docs/research/entrevistas.md` para citas textuales y patrones comunes.
+
+**Resultado clave:** 5/5 entrevistados no comparan precios; 5/5 usarían WhatsApp como canal.
+
+---
+
 ## Roadmap modelos de riesgo
 
 | Fase | Modelo | Datos necesarios |
@@ -57,10 +89,23 @@ docker compose up --build
 
 ---
 
-## Origen
+## Desarrollo en 11 días — historial completo
 
-Idea validada con el pipeline de agentes YC de **[github.com/JohnxBar/hw7_ds](https://github.com/JohnxBar/hw7_ds)**.
-El pipeline evaluó 16 ideas en un torneo bracket — SaludApp obtuvo 80/100 y fue seleccionada para desarrollo.
+El proyecto se construyó en dos repositorios. El trabajo comenzó en **[hw7_ds](https://github.com/JohnxBar/hw7_ds)** (validación y pipeline de agentes YC) y continuó en este repo (implementación del producto).
+
+| Fecha | Repo | Hito |
+|---|---|---|
+| 12 Jun | [hw7_ds](https://github.com/JohnxBar/hw7_ds) | Pipeline de agentes YC — torneo de 16 ideas, FarmaciaAI gana con 80/100 |
+| 13 Jun | [hw7_ds](https://github.com/JohnxBar/hw7_ds) | One-liner, problem statement, segmento de clientes |
+| 14 Jun | Este repo / docs | Entrevista 1 (familiar directo, 68a, Lima) |
+| 15 Jun | Este repo / docs | Entrevista 2 (diabético, Lima Norte) |
+| 16 Jun | Este repo / docs | Entrevista 3 (hipertensa, Surquillo) |
+| 18 Jun | Este repo / docs | Entrevista 4 (cuidadora UP) |
+| 20 Jun | Este repo / docs | Entrevista 5 (ex-paciente SISMED, Lima Este) |
+| 22 Jun | Este repo | MVP completo: bot WhatsApp + Streamlit + DIGEMID + deploy |
+
+Las entrevistas tienen fecha explícita en [`docs/research/entrevistas.md`](docs/research/entrevistas.md).
+El historial de commits de la fase de validación vive en [github.com/JohnxBar/hw7_ds](https://github.com/JohnxBar/hw7_ds).
 
 ---
 
@@ -90,4 +135,5 @@ El pipeline evaluó 16 ideas en un torneo bracket — SaludApp obtuvo 80/100 y f
 
 ## Autor
 
-John Svante Barraza Ratachi — UP Data Science 2026-I
+John Svante Barraza Ratachi — Economía 9° ciclo, Universidad del Pacífico
+Asistente de Investigación, CIUP · UP Data Science 2026-I

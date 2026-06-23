@@ -1,0 +1,459 @@
+\documentclass[aspectratio=169,11pt]{beamer}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[spanish,es-tabla]{babel}
+\usepackage{lmodern}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{ragged2e}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{tikz}
+\usetikzlibrary{positioning}
+\usepackage{amssymb}
+\usepackage{adjustbox}
+\usepackage{tabularx}
+\usepackage{microtype}
+
+% ── Colores ──
+\definecolor{Navy}{HTML}{14213D}
+\definecolor{Cyan}{HTML}{00BFEA}
+\definecolor{Green}{HTML}{12B76A}
+\definecolor{Red}{HTML}{D92D20}
+\definecolor{Cream}{HTML}{F7F8FA}
+\definecolor{Muted}{HTML}{667085}
+\definecolor{Dark}{HTML}{101828}
+
+% ── Tema ──
+\usetheme{default}
+\setbeamertemplate{navigation symbols}{}
+\setbeamersize{text margin left=7mm,text margin right=7mm}
+\setbeamercolor{normal text}{fg=Dark,bg=white}
+\setbeamercolor{structure}{fg=Navy}
+\setbeamercolor{frametitle}{fg=white,bg=Navy}
+\setbeamercolor{title}{fg=white,bg=Navy}
+\setbeamercolor{subtitle}{fg=Cyan}
+\setbeamercolor{author}{fg=white}
+\setbeamercolor{date}{fg=white}
+\setbeamercolor{block title}{fg=white,bg=Navy}
+\setbeamercolor{block body}{fg=Dark,bg=Cream}
+\setbeamercolor{alertblock title}{fg=white,bg=Cyan!70!Navy}
+\setbeamercolor{alertblock body}{fg=Dark,bg=Cyan!8}
+\setbeamercolor{alerted text}{fg=Cyan!70!Navy}
+\setbeamertemplate{blocks}[rounded][shadow=false]
+\setbeamertemplate{itemize item}{\color{Cyan}$\blacktriangleright$}
+\setbeamertemplate{itemize subitem}{\color{Green}$\bullet$}
+
+\setbeamerfont{title}{series=\bfseries,size=\LARGE}
+\setbeamerfont{subtitle}{size=\normalsize}
+\setbeamerfont{frametitle}{series=\bfseries,size=\large}
+\setbeamerfont{block title}{series=\bfseries,size=\small}
+\setbeamerfont{block body}{size=\small}
+\setbeamerfont{itemize/enumerate body}{size=\small}
+\setbeamerfont{itemize/enumerate subbody}{size=\scriptsize}
+
+\setlength{\tabcolsep}{3pt}
+\renewcommand{\arraystretch}{1.12}
+\newcommand{\tightlist}{\setlength\itemsep{2pt}\setlength\parskip{0pt}\setlength\parsep{0pt}}
+\newcommand{\ok}{\textcolor{Green}{\textbf{Sí}}}
+\newcommand{\nope}{\textcolor{Red}{\textbf{No}}}
+
+% ── Footer más bajo para evitar choque ──
+\setbeamertemplate{footline}{%
+  \leavevmode%
+  \hbox{%
+  \begin{beamercolorbox}[wd=.76\paperwidth,ht=1.7ex,dp=.8ex,leftskip=.8em]{author in head/foot}%
+    \tiny\color{Muted} Data Science con Python 2026-I · Universidad del Pacífico
+  \end{beamercolorbox}%
+  \begin{beamercolorbox}[wd=.24\paperwidth,ht=1.7ex,dp=.8ex,rightskip=.8em plus1fil]{date in head/foot}%
+    \tiny\color{Muted}\hfill \insertframenumber{}/\inserttotalframenumber
+  \end{beamercolorbox}}%
+}
+\setbeamercolor{author in head/foot}{bg=white}
+\setbeamercolor{date in head/foot}{bg=white}
+
+\hypersetup{colorlinks=true,urlcolor=Navy,linkcolor=Navy}
+
+% ──────────────────────────────────────────────────────────
+\title{FarmaciaAI}
+\subtitle{Encuentra el medicamento más barato cerca de ti}
+\author{John Svante Barraza Ratachi}
+\institute{Universidad del Pacífico · Data Science con Python 2026-I}
+\date{23 de junio de 2026}
+
+\begin{document}
+
+% ── PORTADA ──────────────────────────────────────────────
+\begin{frame}[plain]
+\begin{tikzpicture}[remember picture,overlay]
+  \fill[Navy] (current page.south west) rectangle (current page.north east);
+  \node[white,font=\Huge\bfseries] at (current page.center) {FarmaciaAI};
+  \node[white,font=\large,yshift=-1.05cm] at (current page.center)
+    {Encuentra el medicamento más barato cerca de ti};
+  \node[Cyan,font=\normalsize,yshift=-1.95cm] at (current page.center)
+    {\textbf{WhatsApp + OCR de recetas} para que pacientes crónicos paguen menos};
+  \node[white!75,font=\small,yshift=-3.05cm] at (current page.center)
+    {John Barraza · UP Data Science 2026-I · 23 Jun 2026};
+  \node[white!75,font=\small,yshift=-3.65cm] at (current page.center)
+    {\url{farmacia-ai.streamlit.app} \quad };
+\end{tikzpicture}
+\end{frame}
+
+% ── FOUNDER ──────────────────────────────────────────────
+\begin{frame}[t]{El Founder — John Barraza}
+\vspace{-0.2em}
+\begin{columns}[T,onlytextwidth]
+\begin{column}{0.49\textwidth}
+\begin{block}{Quién soy}
+\textbf{Economía 9\textdegree\ ciclo · Universidad del Pacífico}\\
+Asistente de Investigación, \textbf{CIUP}\\[0.25em]
+Economista que construye productos de IA. El CIUP me entrenó para validar con datos reales. Ya desplegué 3 apps antes de este proyecto.
+\end{block}
+\vspace{0.25em}
+\begin{block}{Proyectos previos}
+\begin{itemize}\tightlist
+  \item \textbf{MatriculaUp:} optimizador de matrícula UP.
+  \item \textbf{UPBlackboardSync:} material académico + LLMs.
+  \item \textbf{Sumaya:} finanzas personales web + Android.
+\end{itemize}
+\end{block}
+\end{column}
+\begin{column}{0.49\textwidth}
+\begin{block}{¿Por qué yo?}
+\begin{itemize}\tightlist
+  \item \textbf{Economista:} entiendo la asimetría de precios.
+  \item \textbf{CIUP:} valido con datos MINSA, INEI y DIGEMID.
+  \item \textbf{Builder:} ya sé pasar de idea a producto funcionando.
+\end{itemize}
+\end{block}
+\vspace{0.25em}
+\begin{alertblock}{Solo founder — roles cubiertos con IA}
+\begin{tabularx}{\linewidth}{@{}lX@{}}
+\textbf{CTO}      & Claude Code \\
+\textbf{Diseño}   & Stitch / v0.dev \\
+\textbf{Research} & Perplexity + Gemini \\
+\textbf{Clientes} & TikTok + crewAI \\
+\end{tabularx}
+\end{alertblock}
+\end{column}
+\end{columns}
+\end{frame}
+
+% ── 1. PROBLEMA ──────────────────────────────────────────
+\begin{frame}[t]{El Problema}
+\vspace{-0.3em}
+\begin{columns}[T,onlytextwidth]
+\begin{column}{0.56\textwidth}
+{\scriptsize\itshape
+``Mi abuela toma metformina todos los meses. En Inkafarma cuesta S/0.45 por tableta; a 3 cuadras, en Boticas y Salud, cuesta S/0.10. Es \textbf{4.5 veces más barata}. Nunca lo supo.''}
+
+\vspace{0.45em}
+\begin{block}{¿Quién lo sufre?}
+\begin{itemize}\tightlist
+  \item \textbf{3.2M} diabéticos diagnosticados en Perú.
+  \item Gasto mensual estimado: \textbf{S/180--240} en medicamentos.
+  \item Dispersión de precios: hasta \textbf{450\%} para el mismo genérico.
+  \item \textbf{74\%} no compara precios: compra siempre en el mismo lugar.
+\end{itemize}
+\end{block}
+\end{column}
+\begin{column}{0.41\textwidth}
+\begin{block}{¿Cómo lo resuelven hoy?}
+\begin{itemize}\tightlist
+  \item \textbf{Inercia:} misma farmacia siempre.
+  \item \textbf{Google:} precios incompletos o desactualizados.
+  \item \textbf{App DIGEMID:} útil, pero técnica.
+  \item Ninguna opción lee la receta manuscrita.
+\end{itemize}
+\end{block}
+\vspace{0.35em}
+\begin{alertblock}{Evidencia propia}
+5 entrevistas con pacientes crónicos documentadas en \texttt{docs/research/}.
+\end{alertblock}
+\end{column}
+\end{columns}
+\end{frame}
+
+% ── 2. SOLUCIÓN ──────────────────────────────────────────
+\begin{frame}[t]{La Solución — Bot WhatsApp + Web}
+\vspace{-0.2em}
+\begin{columns}[T,onlytextwidth]
+\begin{column}{0.50\textwidth}
+\begin{block}{Flujo en 30 segundos}
+\begin{enumerate}\tightlist
+  \item Usuario manda \textbf{foto de receta} por WhatsApp.
+  \item \textbf{Gemini Vision} extrae medicamentos.
+  \item \textbf{DIGEMID} valida nombres: 18,364 productos.
+  \item Compara precios en farmacias de Lima.
+  \item Responde con precio/unidad + \textbf{Google Maps}.
+\end{enumerate}
+\end{block}
+\vspace{0.35em}
+\begin{block}{Insight}
+El paciente crónico ya usa WhatsApp. No necesita descargar otra app ni aprender una interfaz nueva.
+\end{block}
+\end{column}
+\begin{column}{0.48\textwidth}
+\begin{alertblock}{Ejemplo de respuesta}
+{\ttfamily\scriptsize
+3 medicamentos en tu receta:\\[1pt]
+1. \textbf{Metformina 500mg} — 2 veces al día\\[2pt]
+Precios más baratos:\\
+• S/0.35/tableta — Boticas y Salud\\
+• S/0.45/tableta — Inkafarma\\[2pt]
+Boticas y Salud San Borja\\
+Av. San Luis 2050, San Borja\\
+{[Google Maps link]}}
+\end{alertblock}
+\vspace{0.25em}
+{\scriptsize\textbf{Demo:} \url{farmacia-ai.streamlit.app}\\\textbf{WhatsApp:} +51 994 809 887}
+\end{column}
+\end{columns}
+\end{frame}
+
+% ── 3. WHY NOW ───────────────────────────────────────────
+\begin{frame}[t]{¿Por qué ahora?}
+\vspace{-0.3em}
+\begin{columns}[T,onlytextwidth]
+\begin{column}{0.55\textwidth}
+\begin{block}{5 cambios que hacen viable el producto}
+\begin{itemize}\tightlist
+  \item \textbf{Gemini Vision:} OCR de recetas manuscritas en español.
+  \item \textbf{Baileys / OpenClaw:} bots WhatsApp sin fricción inicial.
+  \item \textbf{DeepSeek V3:} clasificación de intents a bajo costo.
+  \item \textbf{DIGEMID:} observatorio de precios con datos abiertos.
+  \item \textbf{WhatsApp:} canal masivo para usuarios no técnicos.
+\end{itemize}
+\end{block}
+\end{column}
+\begin{column}{0.42\textwidth}
+\begin{block}{Stack del curso usado}
+\begin{adjustbox}{max width=\linewidth}
+\begin{tabular}{ll}
+\toprule
+\textbf{Herramienta} & \textbf{Lectura} \\
+\midrule
+Gemini Vision (OCR) & L14 \\
+Folium + mapas GIS & L3--7 \\
+Baileys / OpenClaw & L15 \\
+DeepSeek V3 (LLM) & L10--11 \\
+Claude Code (CTO) & L15 \\
+\bottomrule
+\end{tabular}
+\end{adjustbox}
+\end{block}
+\vspace{0.25em}
+\begin{alertblock}{Ventaja temporal}
+Hace 18 meses era mucho más caro y lento construir este flujo completo.
+\end{alertblock}
+\end{column}
+\end{columns}
+\end{frame}
+
+% ── COMPETENCIA ──────────────────────────────────────────
+\begin{frame}[t]{Competencia y Moat}
+\vspace{-0.3em}
+\begin{columns}[T,onlytextwidth]
+\begin{column}{0.61\textwidth}
+\begin{block}{¿Quién más existe?}
+\begin{adjustbox}{max width=\linewidth}
+\begin{tabular}{lcccc}
+\toprule
+& \textbf{OCR} & \textbf{WhatsApp} & \textbf{Compara} & \textbf{Gratis} \\
+\midrule
+\textbf{FarmaciaAI} & \ok & \ok & \ok & \ok \\
+Inkafarma App      & \nope & \nope & \nope & \ok \\
+App DIGEMID        & \nope & \nope & \nope & \ok \\
+Google             & \nope & \nope & \nope & \ok \\
+No busco / Excel   & \nope & \nope & \nope & \ok \\
+\bottomrule
+\end{tabular}
+\end{adjustbox}
+\end{block}
+\end{column}
+\begin{column}{0.36\textwidth}
+\begin{block}{Nuestro moat}
+\begin{itemize}\tightlist
+  \item \textbf{Canal único:} WhatsApp, cero fricción.
+  \item \textbf{OCR de recetas:} manuscritas en español.
+  \item \textbf{DIGEMID integrado:} 18,364 productos.
+  \item \textbf{Datos propios:} historial por cadena y distrito.
+\end{itemize}
+\end{block}
+\end{column}
+\end{columns}
+\end{frame}
+
+% ── ARQUITECTURA ─────────────────────────────────────────
+\begin{frame}[t]{Producto — Arquitectura}
+\vspace{-0.4em}
+\begin{columns}[T,onlytextwidth]
+\begin{column}{0.49\textwidth}
+\begin{block}{Canal WhatsApp}
+\centering\vspace{0.1em}
+\begin{tikzpicture}[
+  node distance=0.20cm,
+  b/.style={draw=Navy,fill=Cream,rounded corners,font=\tiny, minimum width=3.65cm,minimum height=0.39cm,align=center},
+  c/.style={draw=Cyan,very thick,fill=Cyan!10,rounded corners,font=\tiny\bfseries, minimum width=3.65cm,minimum height=0.39cm,align=center},
+  a/.style={->,thick,Navy,shorten >=1pt}
+]
+\node[c] (wa)  {Usuario WhatsApp};
+\node[b, below=of wa]  (bot) {Bot Baileys / OpenClaw};
+\node[b, below=of bot] (ocr) {Gemini Vision — OCR receta};
+\node[b, below=of ocr] (dig) {DIGEMID 18{,}364 productos};
+\node[b, below=of dig] (cmp) {Comparador de precios};
+\node[c, below=of cmp] (out) {Respuesta + Maps link};
+\draw[a] (wa)--(bot)--(ocr)--(dig)--(cmp)--(out);
+\end{tikzpicture}
+\end{block}
+\end{column}
+\begin{column}{0.49\textwidth}
+\begin{block}{Canal Web}
+\centering\vspace{0.1em}
+\begin{tikzpicture}[
+  node distance=0.23cm,
+  b/.style={draw=Navy,fill=Cream,rounded corners,font=\tiny, minimum width=3.65cm,minimum height=0.42cm,align=center},
+  c/.style={draw=Cyan,very thick,fill=Cyan!10,rounded corners,font=\tiny\bfseries, minimum width=3.65cm,minimum height=0.42cm,align=center},
+  a/.style={->,thick,Navy,shorten >=1pt}
+]
+\node[c] (web) {farmacia-ai.streamlit.app};
+\node[b, below=of web] (flt) {Filtros: distrito / cadena};
+\node[b, below=of flt] (tbl) {Tabla: precio por unidad};
+\node[c, below=of tbl] (map) {Mapa Folium interactivo};
+\draw[a] (web)--(flt)--(tbl)--(map);
+\end{tikzpicture}
+\end{block}
+\vspace{0.2em}
+\begin{alertblock}{Stack}
+DeepSeek V3 · Streamlit · Pandas · Folium · BeautifulSoup · Baileys
+\end{alertblock}
+\end{column}
+\end{columns}
+\end{frame}
+
+% ── 4. MERCADO ───────────────────────────────────────────
+\begin{frame}[t]{Mercado y Modelo de Negocio}
+\vspace{-0.3em}
+\begin{columns}[T,onlytextwidth]
+\begin{column}{0.49\textwidth}
+\begin{block}{Tamaño de mercado}
+\begin{adjustbox}{max width=\linewidth}
+\begin{tabular}{lll}
+\toprule
+& \textbf{Mercado} & \textbf{USD/año} \\
+\midrule
+TAM & Farmacéutico Perú & \$2.8B \\
+SAM & Crónicos Lima & \$480M \\
+SOM & 40K usuarios 12m & \$2.4M \\
+\bottomrule
+\end{tabular}
+\end{adjustbox}
+\vspace{0.15em}
+{\tiny Fuentes: MINSA 2024, INEI, IMS Health, IPSOS Perú 2025}
+\end{block}
+\vspace{0.25em}
+\begin{block}{Pricing}
+\begin{itemize}\tightlist
+  \item \textbf{Free:} 3 consultas OCR/mes.
+  \item \textbf{Premium:} S/9.90/mes — ilimitado + recordatorios.
+  \item \textbf{Familiar:} S/14.90/mes — 4 perfiles.
+\end{itemize}
+\end{block}
+\end{column}
+\begin{column}{0.49\textwidth}
+\begin{block}{Economía unitaria}
+\begin{tabularx}{\linewidth}{@{}Xr@{}}
+Gemini Vision & \$0.06 \\
+DeepSeek & \$0.03 \\
+Hosting & \$0.03 \\
+\midrule
+\textbf{Costo total} & \textbf{\$0.12/mes} \\
+\end{tabularx}
+\vspace{0.25em}
+Precio Premium: S/9.90 $\approx$ \$2.70\\
+\textcolor{Green}{\textbf{Margen de contribución: \(\sim\)95\%}}
+\end{block}
+\vspace{0.25em}
+\begin{block}{Go-to-Market}
+\textbf{10 usuarios:} familia + compañeros UP\\
+\textbf{100:} Facebook ``Diabéticos Unidos Perú''\\
+\textbf{1K:} médicos endocrinólogos + TikTok
+\end{block}
+\end{column}
+\end{columns}
+\end{frame}
+
+% ── ROADMAP + RIESGOS ────────────────────────────────────
+\begin{frame}[t]{Roadmap y Riesgos}
+\vspace{-0.3em}
+\begin{columns}[T,onlytextwidth]
+\begin{column}{0.50\textwidth}
+\begin{block}{Roadmap}
+\begin{adjustbox}{max width=\linewidth}
+\begin{tabular}{ll}
+\toprule
+\textbf{Plazo} & \textbf{Hito} \\
+\midrule
+3 meses  & 1,000 usuarios · scraper DIGEMID live \\
+6 meses  & WhatsApp Business API oficial · 3K usuarios \\
+12 meses & 10K usuarios · expansión a provincias \\
+\bottomrule
+\end{tabular}
+\end{adjustbox}
+\end{block}
+\end{column}
+\begin{column}{0.47\textwidth}
+\begin{block}{Riesgos y mitigación}
+\begin{enumerate}\tightlist
+  \item \textbf{Scraping DIGEMID}\\
+        {\color{Muted}\scriptsize $\rightarrow$ acuerdo / API oficial.}
+  \item \textbf{Solo founder}\\
+        {\color{Muted}\scriptsize $\rightarrow$ IA como copiloto + arquitectura modular.}
+  \item \textbf{Retención baja}\\
+        {\color{Muted}\scriptsize $\rightarrow$ recordatorios y perfil crónico.}
+\end{enumerate}
+\end{block}
+\end{column}
+\end{columns}
+\end{frame}
+
+% ── 5. TRACCIÓN + ASK ────────────────────────────────────
+\begin{frame}[t]{Tracción y The Ask}
+\vspace{-0.3em}
+\begin{columns}[T,onlytextwidth]
+\begin{column}{0.56\textwidth}
+\begin{block}{Tracción real}
+\begin{itemize}\tightlist
+  \item \textcolor{Green}{$\checkmark$} Bot funcional en número real: +51 994 809 887.
+  \item \textcolor{Green}{$\checkmark$} 5 entrevistas con pacientes crónicos.
+  \item \textcolor{Green}{$\checkmark$} Deploy live: \url{farmacia-ai.streamlit.app}.
+  \item \textcolor{Green}{$\checkmark$} 40+ commits en GitHub y CI configurado.
+  \item \textcolor{Green}{$\checkmark$} Catálogo DIGEMID: 18,364 productos.
+\end{itemize}
+\end{block}
+\vspace{0.2em}
+{\scriptsize Repo: \url{github.com/JohnxBar/farmacia-ai}\\ Demo: \url{farmacia-ai.streamlit.app}}
+\end{column}
+\begin{column}{0.41\textwidth}
+\begin{alertblock}{The Ask}
+\centering
+\Large\textbf{\$120,000 USD}\\[-1pt]
+\scriptsize para 18 meses
+\vspace{0.25em}
+\begin{itemize}\tightlist
+  \item Scraper precios DIGEMID en tiempo real.
+  \item WhatsApp Business API oficial.
+  \item Llegar a 5,000 usuarios Premium.
+\end{itemize}
+\vspace{0.25em}
+\textbf{Milestone:} 1,000 usuarios activos de pago con retención $>$60\% a 3 meses.
+\end{alertblock}
+\end{column}
+\end{columns}
+\vfill
+\centering
+{\small\bfseries ``Make something people want.'' — Y Combinator}
+\end{frame}
+
+\end{document}

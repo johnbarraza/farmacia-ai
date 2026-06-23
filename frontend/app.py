@@ -258,16 +258,18 @@ with t1:
                         "💊 Ir a **Comparar Precios**\n"
                         "📊 Ir a **Riesgo Diabetes**\n"
                         "O escribirme: **PRECIOS**, **RIESGO**, **RECORDATORIOS**, **FAMILIAR**")
-            elif txt in ("PRECIOS", "PRECIO", "FARMACIA", "FARMACIAS", "DONDE", "2", "MAPA"):
+            elif txt in ("1", "2", "RECETA", "FOTO", "AUDIO"):
+                resp = "📸 Subí la foto de tu receta en la sección derecha (📤 subir imagen). Te extraigo los medicamentos y comparo precios al instante."
+            elif txt in ("PRECIOS", "PRECIO", "FARMACIA", "FARMACIAS", "DONDE", "3", "MAPA"):
                 resp = "🗺️ Abrí la pestaña **💊 Comparar Precios** para ver el mapa interactivo con precios en tiempo real de 15 farmacias en Lima."
-            elif txt in ("RIESGO", "DIABETES", "GLUCOSA", "AZUCAR", "3"):
+            elif txt in ("RIESGO", "DIABETES", "GLUCOSA", "AZUCAR", "4"):
                 resp = "📊 Abrí la pestaña **📊 Riesgo Diabetes** para el test FINDRISC (validado OMS). Sin análisis de sangre. Resultado en 2 minutos."
-            elif txt in ("RECORDATORIOS", "RECORDATORIO", "ALARMA", "ALARMAS", "1"):
+            elif txt in ("RECORDATORIOS", "RECORDATORIO", "ALARMA", "ALARMAS"):
                 resp = ("✅ **Recordatorios activados** (demo)\n\n"
                         "☀️ 8:00 AM — Pastilla con desayuno\n"
                         "🌙 9:00 PM — Pastilla con cena\n\n"
                         "En producción: te llega por WhatsApp todos los días.")
-            elif txt in ("FAMILIAR", "FAMILIA", "HIJO", "HIJA", "ALERTAS"):
+            elif txt in ("FAMILIAR", "FAMILIA", "HIJO", "HIJA", "ALERTAS", "5"):
                 resp = ("👨‍👩‍👧 **Plan Familiar**\n\n"
                         "Tu familiar recibe una alerta si olvidás tomar tus pastillas.\n\n"
                         "7 días gratis → S/14.90/mes\n"

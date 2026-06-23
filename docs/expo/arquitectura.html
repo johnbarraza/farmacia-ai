@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FarmaciaAI — Arquitectura del Sistema</title>
+  <style>
+    :root {
+      --navy:   #14213D;
+      --navy2:  #1a2d50;
+      --cyan:   #00D4FF;
+      --green:  #00FF88;
+      --purple: #7c3aed;
+      --amber:  #f59e0b;
+      --muted:  #6B7280;
+      --text:   #e2e8f0;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--navy);
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      color: var(--text);
+      min-height: 100vh;
+      padding: 2rem 1.5rem 3rem;
+    }
+
+    /* ── Header ── */
+    header {
+      text-align: center;
+      margin-bottom: 2.5rem;
+    }
+    header h1 {
+      font-size: 1.9rem;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+    }
+    header h1 span { color: var(--cyan); }
+    header p {
+      color: var(--muted);
+      font-size: 0.88rem;
+      margin-top: 0.35rem;
+    }
+
+    /* ── Diagram wrapper ── */
+    .diagram {
+      max-width: 860px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0;
+    }
+
+    /* ── Channel labels ── */
+    .ch-labels {
+      display: flex;
+      width: 100%;
+      justify-content: space-between;
+      margin-bottom: 0.7rem;
+    }
+    .ch-label {
+      width: 48%;
+      text-align: center;
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+
+    /* ── Two-column rows ── */
+    .row2 {
+      display: flex;
+      width: 100%;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+
+    /* ── Nodes ── */
+    .node {
+      border-radius: 10px;
+      border: 1.5px solid #2d4070;
+      background: var(--navy2);
+      padding: 0.75rem 1rem;
+      text-align: center;
+      width: 48%;
+      transition: transform .15s, box-shadow .15s;
+    }
+    .node:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 20px rgba(0,0,0,.4);
+    }
+    .node.user   { border-color: var(--cyan);   background: rgba(0,212,255,.07);  }
+    .node.web    { border-color: var(--green);  background: rgba(0,255,136,.06);  }
+    .node.ai     { border-color: var(--purple); background: rgba(124,58,237,.07); }
+    .node.gis    { border-color: var(--green);  background: rgba(0,255,136,.05);  }
+    .node.output { border-color: var(--amber);  background: rgba(245,158,11,.07); }
+
+    .node .icon   { font-size: 1.4rem; display: block; margin-bottom: 0.25rem; }
+    .node .lbl    { font-weight: 600; font-size: 0.9rem; }
+    .node .sub    { color: var(--muted); font-size: 0.75rem; margin-top: 0.2rem; line-height: 1.35; }
+    .badge {
+      display: inline-block;
+      margin-top: 0.3rem;
+      padding: 0.1rem 0.45rem;
+      border-radius: 4px;
+      font-size: 0.68rem;
+      font-weight: 600;
+      border: 1px solid;
+    }
+    .badge.cy { color: var(--cyan);   border-color: var(--cyan);   background: rgba(0,212,255,.1);  }
+    .badge.gr { color: var(--green);  border-color: var(--green);  background: rgba(0,255,136,.1);  }
+    .badge.pu { color: #a78bfa;       border-color: var(--purple); background: rgba(124,58,237,.1); }
+
+    /* ── Full-width nodes ── */
+    .node-full {
+      border-radius: 10px;
+      border: 1.5px solid;
+      padding: 0.8rem 1.2rem;
+      text-align: center;
+      width: 100%;
+      max-width: 480px;
+      transition: transform .15s, box-shadow .15s;
+    }
+    .node-full:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 20px rgba(0,0,0,.4);
+    }
+    .node-full.db {
+      border-color: var(--green);
+      background: rgba(0,255,136,.07);
+    }
+    .node-full.brain {
+      border-color: var(--purple);
+      background: rgba(124,58,237,.07);
+    }
+    .node-full .icon { font-size: 1.4rem; display: block; margin-bottom: 0.25rem; }
+    .node-full .lbl  { font-weight: 600; font-size: 0.92rem; }
+    .node-full .sub  { color: var(--muted); font-size: 0.76rem; margin-top: 0.2rem; line-height: 1.35; }
+
+    /* ── Arrow helpers ── */
+    .arr2 {
+      display: flex;
+      width: 100%;
+      justify-content: space-between;
+      padding: 0 calc(24% - 0.5rem);
+    }
+    .arr-col {
+      display: flex; flex-direction: column; align-items: center;
+      color: var(--muted);
+    }
+    .arr-col .line { width: 2px; height: 16px; background: var(--muted); }
+    .arr-col span  { font-size: 1rem; line-height: 1; }
+
+    .arr-center {
+      display: flex; flex-direction: column; align-items: center;
+      color: var(--muted); padding: 0.1rem 0;
+    }
+    .arr-center .line { width: 2px; height: 16px; background: var(--muted); }
+    .arr-center span  { font-size: 1rem; }
+
+    /* ── SVG merge / split ── */
+    .svg-wrap {
+      width: 100%;
+      max-width: 860px;
+      display: flex;
+      justify-content: center;
+    }
+    .svg-wrap svg { overflow: visible; }
+
+    /* ── Outputs row ── */
+    .outputs {
+      display: flex;
+      width: 100%;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+    .out-node {
+      border-radius: 10px;
+      border: 1.5px solid var(--amber);
+      background: rgba(245,158,11,.07);
+      padding: 0.75rem 1rem;
+      text-align: center;
+      width: 48%;
+      transition: transform .15s;
+    }
+    .out-node:hover { transform: translateY(-2px); }
+    .out-node .icon { font-size: 1.4rem; display: block; margin-bottom: 0.25rem; }
+    .out-node .lbl  { font-weight: 600; font-size: 0.88rem; }
+    .out-node .sub  { color: var(--muted); font-size: 0.74rem; margin-top: 0.2rem; line-height: 1.35; }
+
+    /* ── Stack pills ── */
+    .pills {
+      display: flex; flex-wrap: wrap; gap: 0.45rem;
+      justify-content: center; margin: 2rem auto 0;
+      max-width: 860px;
+    }
+    .pill {
+      padding: 0.25rem 0.85rem;
+      border-radius: 999px;
+      font-size: 0.76rem;
+      border: 1px solid #2d4070;
+      background: var(--navy2);
+      color: #94a3b8;
+    }
+    .pill.hi { border-color: var(--cyan); color: var(--cyan); background: rgba(0,212,255,.07); }
+
+    /* ── Legend ── */
+    .legend {
+      display: flex; flex-wrap: wrap; gap: 1.2rem;
+      justify-content: center; margin-top: 1.6rem;
+    }
+    .leg { display: flex; align-items: center; gap: 0.45rem; font-size: 0.78rem; color: var(--muted); }
+    .leg-dot { width: 12px; height: 12px; border-radius: 3px; border: 1.5px solid; }
+
+    /* ── Footer ── */
+    footer {
+      text-align: center; margin-top: 2.5rem;
+      color: var(--muted); font-size: 0.8rem; line-height: 1.8;
+    }
+    footer a { color: var(--cyan); text-decoration: none; }
+    footer a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>&#128138; <span>FarmaciaAI</span> &mdash; Arquitectura del Sistema</h1>
+  <p>Data Science con Python 2026-I &middot; Universidad del Pac&iacute;fico &middot; John Svante Barraza Ratachi</p>
+</header>
+
+<div class="diagram">
+
+  <!-- Channel labels -->
+  <div class="ch-labels">
+    <div class="ch-label" style="color:var(--cyan);">&#128241; Canal WhatsApp</div>
+    <div class="ch-label" style="color:var(--green);">&#127760; Canal Web</div>
+  </div>
+
+  <!-- Row 1 — Users -->
+  <div class="row2">
+    <div class="node user">
+      <span class="icon">&#128241;</span>
+      <div class="lbl">Usuario WhatsApp</div>
+      <div class="sub">+51 994 809 887 &middot; env&iacute;a foto de receta o texto</div>
+      <span class="badge cy">94% penetraci&oacute;n Lima</span>
+    </div>
+    <div class="node web">
+      <span class="icon">&#127760;</span>
+      <div class="lbl">Usuario Web</div>
+      <div class="sub">farmacia-ai.streamlit.app &middot; sin instalaci&oacute;n</div>
+      <span class="badge gr">Streamlit Cloud</span>
+    </div>
+  </div>
+
+  <!-- Arrows -->
+  <div class="arr2">
+    <div class="arr-col"><div class="line"></div><span>&#8595;</span></div>
+    <div class="arr-col"><div class="line"></div><span>&#8595;</span></div>
+  </div>
+
+  <!-- Row 2 — Entry layer -->
+  <div class="row2">
+    <div class="node">
+      <span class="icon">&#129302;</span>
+      <div class="lbl">Bot Baileys / OpenClaw</div>
+      <div class="sub">Node.js &middot; recibe imagen, texto y audio de WhatsApp</div>
+      <span class="badge cy">L15</span>
+    </div>
+    <div class="node gis">
+      <span class="icon">&#128202;</span>
+      <div class="lbl">Streamlit Frontend</div>
+      <div class="sub">Filtros por distrito y cadena &middot; tabla precios</div>
+      <span class="badge gr">L3-7</span>
+    </div>
+  </div>
+
+  <!-- Arrows -->
+  <div class="arr2">
+    <div class="arr-col"><div class="line"></div><span>&#8595;</span></div>
+    <div class="arr-col"><div class="line"></div><span>&#8595;</span></div>
+  </div>
+
+  <!-- Row 3 — AI / Map layer -->
+  <div class="row2">
+    <div class="node ai">
+      <span class="icon">&#128065;&#65039;</span>
+      <div class="lbl">Gemini Vision &mdash; OCR</div>
+      <div class="sub">Recetas manuscritas en espa&ntilde;ol &middot; $0.0015/img &middot; 18 meses atr&aacute;s imposible</div>
+      <span class="badge pu">L14</span>
+    </div>
+    <div class="node gis">
+      <span class="icon">&#128506;</span>
+      <div class="lbl">Folium &mdash; Mapas GIS</div>
+      <div class="sub">15 distritos Lima &middot; pins por farmacia &middot; links Google Maps</div>
+      <span class="badge gr">L3-7</span>
+    </div>
+  </div>
+
+  <!-- Merge SVG -->
+  <div class="svg-wrap">
+    <svg width="540" height="50" viewBox="0 0 540 50">
+      <line x1="135" y1="2"  x2="270" y2="42" stroke="#6B7280" stroke-width="1.8"/>
+      <line x1="405" y1="2"  x2="270" y2="42" stroke="#6B7280" stroke-width="1.8"/>
+      <polygon points="263,38 277,38 270,50" fill="#6B7280"/>
+    </svg>
+  </div>
+
+  <!-- DIGEMID central node -->
+  <div class="node-full db">
+    <span class="icon">&#127963;</span>
+    <div class="lbl">DIGEMID &mdash; Observatorio de Precios</div>
+    <div class="sub">18,364 productos &middot; 7 cadenas (Inkafarma, Boticas y Salud, Mifarma, Fasa, BTL, SalcoBrand, Arcangel) &middot; 15 distritos Lima &middot; Datos abiertos MINSA</div>
+    <span class="badge gr">Fuente oficial MINSA</span>
+  </div>
+
+  <!-- Arrow down -->
+  <div class="arr-center">
+    <div class="line"></div><span>&#8595;</span>
+  </div>
+
+  <!-- DeepSeek + Comparador -->
+  <div class="node-full brain">
+    <span class="icon">&#129504;</span>
+    <div class="lbl">DeepSeek V3 &mdash; Clasificador de intents + Comparador</div>
+    <div class="sub">40&times; m&aacute;s barato que GPT-4 &middot; Detecta medicamento en texto libre &middot; Calcula precio/unidad (tableta, c&aacute;psula) &middot; Encuentra farmacia m&aacute;s barata por distrito</div>
+    <span class="badge pu">L10-11</span>
+  </div>
+
+  <!-- Split SVG -->
+  <div class="svg-wrap">
+    <svg width="540" height="50" viewBox="0 0 540 50">
+      <line x1="270" y1="2"  x2="135" y2="42" stroke="#6B7280" stroke-width="1.8"/>
+      <line x1="270" y1="2"  x2="405" y2="42" stroke="#6B7280" stroke-width="1.8"/>
+      <polygon points="128,38 142,38 135,50" fill="#6B7280"/>
+      <polygon points="398,38 412,38 405,50" fill="#6B7280"/>
+    </svg>
+  </div>
+
+  <!-- Outputs -->
+  <div class="outputs">
+    <div class="out-node">
+      <span class="icon">&#128172;</span>
+      <div class="lbl">Respuesta WhatsApp</div>
+      <div class="sub">Nombre medicamento &middot; Precio/unidad por farmacia &middot; Direcci&oacute;n &middot; Link Google Maps &middot; Dosis de la receta</div>
+    </div>
+    <div class="out-node">
+      <span class="icon">&#128200;</span>
+      <div class="lbl">Tabla + Mapa Folium</div>
+      <div class="sub">Tabla precios comparativa &middot; Columna precio/tableta &middot; Estimado caja 30 unidades &middot; Mapa interactivo con pins</div>
+    </div>
+  </div>
+
+</div><!-- /diagram -->
+
+<!-- Stack pills -->
+<div class="pills">
+  <span class="pill hi">Gemini Vision (OCR)</span>
+  <span class="pill hi">DeepSeek V3 (LLM)</span>
+  <span class="pill hi">Baileys / OpenClaw</span>
+  <span class="pill hi">Folium GIS</span>
+  <span class="pill hi">Claude Code (CTO)</span>
+  <span class="pill">FastAPI</span>
+  <span class="pill">Streamlit</span>
+  <span class="pill">Pandas</span>
+  <span class="pill">BeautifulSoup</span>
+  <span class="pill">Node.js</span>
+  <span class="pill">Python 3.12</span>
+  <span class="pill">DIGEMID API</span>
+  <span class="pill">Docker</span>
+</div>
+
+<!-- Legend -->
+<div class="legend">
+  <div class="leg">
+    <div class="leg-dot" style="border-color:var(--cyan); background:rgba(0,212,255,.08);"></div>
+    Canal / Usuario
+  </div>
+  <div class="leg">
+    <div class="leg-dot" style="border-color:var(--purple); background:rgba(124,58,237,.08);"></div>
+    Modelo IA
+  </div>
+  <div class="leg">
+    <div class="leg-dot" style="border-color:var(--green); background:rgba(0,255,136,.08);"></div>
+    Datos / Backend
+  </div>
+  <div class="leg">
+    <div class="leg-dot" style="border-color:var(--amber); background:rgba(245,158,11,.08);"></div>
+    Output / Respuesta
+  </div>
+</div>
+
+<footer>
+  <p>
+    Demo:&nbsp;<a href="https://farmacia-ai.streamlit.app" target="_blank">farmacia-ai.streamlit.app</a>
+    &nbsp;&middot;&nbsp;
+    Repo:&nbsp;<a href="https://github.com/JohnxBar/farmacia-ai" target="_blank">github.com/JohnxBar/farmacia-ai</a>
+    &nbsp;&middot;&nbsp;
+    WhatsApp: +51 994 809 887
+  </p>
+  <p>Data Science con Python 2026-I &middot; Universidad del Pac&iacute;fico &middot; John Svante Barraza Ratachi</p>
+</footer>
+
+</body>
+</html>
