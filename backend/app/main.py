@@ -247,30 +247,68 @@ async def whatsapp_webhook(msg: WhatsAppMessage):
                 frec  = f"\n   ⏰ {m['frecuencia']}" if m.get("frecuencia") else ""
                 cant  = f"\n   📦 {m['cantidad']}" if m.get("cantidad") else ""
                 response_text += f"{i}. *{nombre}*{dosis}{frec}{cant}\n"
-            # Buscar precio + unidad + Google Maps para cada medicamento
+            # Basket: qué farmacia tiene más medicamentos juntos al menor precio
             from ai.health_agents import buscar_precio_farmacia, fuzzy_med_id
+            from collections import defaultdict
             meds_catalog = json.loads((DATA_DIR / "medicamentos.json").read_text(encoding="utf-8"))["medicamentos"]
             farmacias_data = json.loads((DATA_DIR / "farmacias_lima.json").read_text(encoding="utf-8"))
-            response_text += "\n💰 *Precios más baratos:*\n"
-            primera_barata = None
+
+            total_meds = min(len(medicamentos), 3)
+            pharmacy_basket = defaultdict(lambda: {"meds": [], "total": 0.0, "info": None})
+            meds_sin_precio = []
+
             for m in medicamentos[:3]:
-                nombre_m = m.get("nombre", "")
-                med_id = fuzzy_med_id(nombre_m, meds_catalog)
-                precios = buscar_precio_farmacia(med_id, farmacias_data)
+                nombre_m = m.get("nombre", "?")
+                med_id   = fuzzy_med_id(nombre_m, meds_catalog)
+                precios  = buscar_precio_farmacia(med_id, farmacias_data, max_km=15.0)
                 cat_info = next((x for x in meds_catalog if x["id"] == med_id), None)
-                unidad = cat_info.get("presentacion", "unidad").lower() if cat_info else "unidad"
-                if precios:
-                    b = precios[0]
-                    if not primera_barata:
-                        primera_barata = b
-                    response_text += f"• *{nombre_m}*: S/{b['precio']:.2f}/{unidad} en {b['nombre'][:25]}\n"
-            if primera_barata:
-                maps_url = f"https://www.google.com/maps/dir/?api=1&destination={primera_barata['lat']},{primera_barata['lng']}"
-                response_text += (
-                    f"\n📍 *{primera_barata['nombre']}*\n"
-                    f"📮 {primera_barata.get('direccion', '')}\n"
-                    f"🗺️ {maps_url}"
-                )
+                unidad   = cat_info.get("presentacion", "unidad").lower() if cat_info else "unidad"
+                if not precios:
+                    meds_sin_precio.append(nombre_m)
+                    continue
+                for p in precios:
+                    fid = p["farmacia_id"]
+                    pharmacy_basket[fid]["meds"].append(
+                        {"nombre": nombre_m, "precio": p["precio"], "unidad": unidad}
+                    )
+                    # total_efectivo incluye penalidad de distancia (S/0.50/km)
+                    pharmacy_basket[fid]["total_efectivo"] = \
+                        pharmacy_basket[fid].get("total_efectivo", 0.0) + p["precio_efectivo"]
+                    pharmacy_basket[fid]["total_precio"] = \
+                        pharmacy_basket[fid].get("total_precio", 0.0) + p["precio"]
+                    if pharmacy_basket[fid]["info"] is None:
+                        pharmacy_basket[fid]["info"] = p
+
+            # Ordenar: más medicamentos primero, luego menor precio+distancia
+            sorted_baskets = sorted(
+                pharmacy_basket.items(),
+                key=lambda x: (-len(x[1]["meds"]), x[1].get("total_efectivo", 999))
+            )
+
+            if sorted_baskets:
+                response_text += f"\n🏪 *¿Dónde comprar todo junto?*\n"
+                for fid, basket in sorted_baskets[:2]:
+                    info     = basket["info"]
+                    count    = len(basket["meds"])
+                    dist_km  = info.get("dist_km", 0)
+                    total_p  = basket.get("total_precio", 0.0)
+                    maps_url = (
+                        f"https://www.google.com/maps/dir/?api=1"
+                        f"&destination={info['lat']},{info['lng']}"
+                    )
+                    emoji = "🏆" if count == total_meds else "🔄"
+                    response_text += (
+                        f"\n{emoji} *{info['nombre']}* — {count}/{total_meds} · {dist_km:.1f} km\n"
+                    )
+                    for med in basket["meds"]:
+                        response_text += f"   • {med['nombre']}: S/{med['precio']:.2f}/{med['unidad']}\n"
+                    response_text += (
+                        f"   💰 Total medicamentos: S/{total_p:.2f}\n"
+                        f"   📮 {info.get('direccion', '')}\n"
+                        f"   🗺️ {maps_url}\n"
+                    )
+                if meds_sin_precio:
+                    response_text += f"\n⚠️ Sin precio en catálogo: {', '.join(meds_sin_precio)}\n"
 
             remaining = remaining_free(session) - 1
             if not session["unlocked"] and remaining > 0:
