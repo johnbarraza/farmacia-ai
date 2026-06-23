@@ -152,7 +152,7 @@ async def whatsapp_webhook(msg: WhatsAppMessage):
     from app.user_session import (
         get_session, save_session, is_allowed, record_consultation,
         remaining_free, unlock, gate_message, unlock_message,
-        handle_onboard_input, start_onboarding, onboard_prompt, UNLOCK_CODE,
+        handle_onboard_input, start_onboarding, onboard_prompt, UNLOCK_CODE, RESET_CODE,
         FREE_CONSULTATIONS,
     )
     from app.security import rate_limit_ok, validate_phone, sanitize_text, is_injection
@@ -186,11 +186,19 @@ async def whatsapp_webhook(msg: WhatsAppMessage):
             if resp:
                 return {"response": resp, "medicamentos": [], "_debug": {"intent": "onboarding"}}
 
-    # ── 2. Código de desbloqueo ───────────────────────────────────────────
-    if msg.text and msg.text.strip().lower() == UNLOCK_CODE:
-        unlock(session)
-        save_session(session)
-        return {"response": unlock_message(), "medicamentos": [], "_debug": {"intent": "unlock"}}
+    # ── 2. Comandos especiales ────────────────────────────────────────────
+    if msg.text:
+        cmd = msg.text.strip().lower()
+        if cmd == UNLOCK_CODE:
+            unlock(session)
+            save_session(session)
+            return {"response": unlock_message(), "medicamentos": [], "_debug": {"intent": "unlock"}}
+        if cmd == RESET_CODE:
+            from app.user_session import reset_consultations
+            reset_consultations(session)
+            save_session(session)
+            return {"response": f"🔄 Consultas reiniciadas. Tenés {FREE_CONSULTATIONS} consultas gratis de nuevo.",
+                    "medicamentos": [], "_debug": {"intent": "reset"}}
 
     # ── 3. Gate freemium ──────────────────────────────────────────────────
     if not is_allowed(session):

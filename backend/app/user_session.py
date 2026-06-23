@@ -11,9 +11,11 @@ from datetime import datetime
 SESSIONS_DIR = Path(__file__).resolve().parents[2] / "data" / "sessions"
 SESSIONS_DIR.mkdir(parents=True, exist_ok=True)
 
-FREE_CONSULTATIONS = 3
+import os
+FREE_CONSULTATIONS = int(os.getenv("FREE_CONSULTATIONS", "3"))
 UNLOCK_CODE = "homework-startup"
-SUBSCRIBE_URL = "https://saludapp-peru.streamlit.app"  # TODO: reemplazar con página de pago
+RESET_CODE  = "reset-demo"   # código secreto para reiniciar consultas en pruebas
+SUBSCRIBE_URL = "https://saludapp-peru.streamlit.app"
 
 
 def _path(phone: str) -> Path:
@@ -63,6 +65,12 @@ def remaining_free(session: dict) -> int:
 
 def unlock(session: dict) -> None:
     session["unlocked"] = True
+
+
+def reset_consultations(session: dict) -> None:
+    """Reinicia el contador de consultas — solo para pruebas."""
+    session["free_consultations"] = 0
+    session["unlocked"] = False
 
 
 def gate_message(session: dict) -> str:
